@@ -20,6 +20,8 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: roomie
       ME_CONFIG_MONGODB_ADMINPASSWORD: roomie
       ME_CONFIG_MONGODB_SERVER: mongodb
+    depends_on:
+      - mongodb
 
   mail-dev:
     container_name: ms-mail-dev
@@ -28,9 +30,65 @@ services:
       - 1080:1080
       - 1025:1025
 
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:21.1.1
+    volumes:
+      - keycloak:/opt/jboss/keycloak/standalone/data
+    environment:
+      KEYCLOAK_ADMIN: roomie
+      KEYCLOAK_ADMIN_PASSWORD: roomie
+      DB_VENDOR: postgres
+      DB_ADDR: keycloak-db
+      DB_DATABASE: keycloak_db
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak_password
+    ports:
+      - "9090:8080"
+    command:
+      - "start-dev"
+
+  keycloak-db:
+    image: postgres:13
+    container_name: keycloak-db
+    environment:
+      POSTGRES_DB: keycloak_db
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak_password
+      PGDATA: /data/postgres
+    ports:
+      - "5432:5432"
+    depends_on:
+      - keycloak
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: ms_pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: roomie@roomie.com
+      PGADMIN_DEFAULT_PASSWORD: roomie
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - keycloak-db
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
 networks:
   microservices-net:
     driver: bridge
 
 volumes:
   mongodb:
+  keycloak:
+  postgres:
+  pgadmin:
