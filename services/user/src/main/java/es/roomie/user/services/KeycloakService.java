@@ -1,5 +1,6 @@
 package es.roomie.user.services;
 
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -19,8 +20,7 @@ public class KeycloakService {
         this.keycloak = keycloak;
     }
 
-    public UserRepresentation getUserById(String userId) {
-        log.info("Fetching user info by ID {}", userId);
+    public UserRepresentation getUserById(String userId) throws NotFoundException {
         return  getUsersResource()
                 .get(userId)
                 .toRepresentation();

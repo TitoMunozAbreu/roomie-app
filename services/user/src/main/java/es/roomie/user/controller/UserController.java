@@ -1,15 +1,22 @@
 package es.roomie.user.controller;
 
-import es.roomie.user.model.User;
+import es.roomie.user.exceptions.UnAuthorizeUserException;
+import es.roomie.user.model.request.TaskPreferenceRequest;
+import es.roomie.user.model.response.TaskPreferenceResponse;
+import es.roomie.user.model.response.UserResponse;
 import es.roomie.user.services.UserService;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -19,7 +26,17 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<User> getUser(@PathVariable("userId") String userId) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable String userId) {
         return userService.getUserById(userId);
+    }
+
+    @PutMapping("/{userId}/preferences")
+    public ResponseEntity<List<TaskPreferenceResponse>> updateUserPreferences(@AuthenticationPrincipal Jwt principal,
+                                                                        @PathVariable String userId,
+                                                                        @Valid @RequestBody List<TaskPreferenceRequest> taskPreferences){
+        if(!principal.getSubject().equals(userId)) {
+            throw new UnAuthorizeUserException("You do not have permissions to access this resource.");
+        }
+        return userService.updateUserPreferences(userId, taskPreferences);
     }
 }

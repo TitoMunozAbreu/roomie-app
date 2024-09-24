@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -23,5 +24,10 @@ public class GloblalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<?> handleNotFoundException(NotFoundException ex) {
         return new ResponseEntity<>("User not found", NOT_FOUND);
+    }
+
+    @ExceptionHandler(UnAuthorizeUserException.class)
+    public ResponseEntity<?> handleUnAuthorizeUserException(UnAuthorizeUserException ex) {
+        return new ResponseEntity<>(ex.getMessage(), UNAUTHORIZED);
     }
 }
