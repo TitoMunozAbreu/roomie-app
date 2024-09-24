@@ -82,6 +82,11 @@
 			<artifactId>mapstruct-processor</artifactId>
 			<version>1.6.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client</artifactId>
+			<version>25.0.6</version>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
