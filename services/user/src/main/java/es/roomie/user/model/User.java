@@ -16,9 +16,6 @@ import java.util.List;
 @Document
 public class User {
     @Id private String id;
-    private String firstname;
-    private String lastname;
-    private String email;
     private List<TaskPreference> taskPreferences;
     private List<TaskHistory> taskHistories;
     private List<Availability> availabilities;

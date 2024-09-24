@@ -1,8 +1,8 @@
 package es.roomie.user.controller;
 
 import es.roomie.user.model.User;
-import es.roomie.user.services.KeycloakService;
-import org.keycloak.representations.idm.UserRepresentation;
+import es.roomie.user.services.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,20 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-    private final KeycloakService keycloakService;
+    private final UserService userService;
 
-    public UserController(KeycloakService keycloakService) {
-        this.keycloakService = keycloakService;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping("/{userId}")
-    public User getUser(@PathVariable("userId") String userId) {
-        UserRepresentation userFound = keycloakService.getUserById(userId);
-        return User.builder()
-                .id(userFound.getId())
-                .email(userFound.getEmail())
-                .firstname(userFound.getFirstName())
-                .lastname(userFound.getLastName())
-                .build();
+    public ResponseEntity<User> getUser(@PathVariable("userId") String userId) {
+        return userService.getUserById(userId);
     }
 }
