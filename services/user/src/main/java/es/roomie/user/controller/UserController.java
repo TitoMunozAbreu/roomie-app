@@ -1,7 +1,9 @@
 package es.roomie.user.controller;
 
 import es.roomie.user.exceptions.UnAuthorizeUserException;
+import es.roomie.user.model.request.AvailabilityRequest;
 import es.roomie.user.model.request.TaskPreferenceRequest;
+import es.roomie.user.model.response.AvailabilityResponse;
 import es.roomie.user.model.response.TaskPreferenceResponse;
 import es.roomie.user.model.response.UserResponse;
 import es.roomie.user.services.UserService;
@@ -39,4 +41,15 @@ public class UserController {
         }
         return userService.updateUserPreferences(userId, taskPreferences);
     }
+
+    @PutMapping("/{userId}/availailities")
+    public ResponseEntity<List<AvailabilityResponse>> updateUserAvailailities(@AuthenticationPrincipal Jwt principal,
+                                                                              @PathVariable String userId,
+                                                                              @Valid @RequestBody List<AvailabilityRequest> availabilities){
+        if(!principal.getSubject().equals(userId)) {
+            throw new UnAuthorizeUserException("You do not have permissions to access this resource.");
+        }
+        return userService.updateUserAvailailities(userId, availabilities);
+    }
+
 }

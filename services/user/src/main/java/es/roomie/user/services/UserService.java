@@ -1,10 +1,13 @@
 package es.roomie.user.services;
 
 import es.roomie.user.exceptions.ResourceNotFoundException;
+import es.roomie.user.mapper.AvailabilityMapper;
 import es.roomie.user.mapper.TaskPreferenceMapper;
 import es.roomie.user.mapper.UserMapper;
 import es.roomie.user.model.User;
+import es.roomie.user.model.request.AvailabilityRequest;
 import es.roomie.user.model.request.TaskPreferenceRequest;
+import es.roomie.user.model.response.AvailabilityResponse;
 import es.roomie.user.model.response.TaskPreferenceResponse;
 import es.roomie.user.model.response.UserResponse;
 import es.roomie.user.repositories.UserRepository;
@@ -27,16 +30,19 @@ public class UserService {
     private final KeycloakService keycloakService;
     private final UserMapper userMapper;
     private final TaskPreferenceMapper taskPreferenceMapper;
+    private final AvailabilityMapper availabilityMapper;
 
 
     public UserService(UserRepository userRepository,
                        KeycloakService keycloakService,
                        UserMapper userMapper,
-                       TaskPreferenceMapper taskPreferenceMapper) {
+                       TaskPreferenceMapper taskPreferenceMapper,
+                       AvailabilityMapper availabilityMapper) {
         this.userRepository = userRepository;
         this.keycloakService = keycloakService;
         this.userMapper = userMapper;
         this.taskPreferenceMapper = taskPreferenceMapper;
+        this.availabilityMapper = availabilityMapper;
     }
 
     public ResponseEntity<UserResponse> getUserById(String userId) {
@@ -59,5 +65,16 @@ public class UserService {
         userRepository.save(userFound);
         List<TaskPreferenceResponse> taskPreferenceResponses = taskPreferenceMapper.mapToTaskPreferenceResponse(userFound.getTaskPreferences());
         return new ResponseEntity<>(taskPreferenceResponses, ACCEPTED);
+    }
+
+    public ResponseEntity<List<AvailabilityResponse>> updateUserAvailailities(String userId, List<AvailabilityRequest> availabilities) {
+        User userFound = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        log.info("Update user availabilities");
+        userFound.setAvailabilities(availabilityMapper.mapToAvailability(availabilities));
+        userRepository.save(userFound);
+        List<AvailabilityResponse> availabilityResponses = availabilityMapper.mapToAvailabilityResponse(userFound.getAvailabilities());
+        return new ResponseEntity<>(availabilityResponses, ACCEPTED);
     }
 }
