@@ -1,9 +1,11 @@
 package es.roomie.user.controller;
 
 import es.roomie.user.exceptions.UnAuthorizeUserException;
+import es.roomie.user.model.TaskHistory;
 import es.roomie.user.model.request.AvailabilityRequest;
 import es.roomie.user.model.request.TaskPreferenceRequest;
 import es.roomie.user.model.response.AvailabilityResponse;
+import es.roomie.user.model.response.TaskHistoryResponse;
 import es.roomie.user.model.response.TaskPreferenceResponse;
 import es.roomie.user.model.response.UserResponse;
 import es.roomie.user.services.UserService;
@@ -52,4 +54,8 @@ public class UserController {
         return userService.updateUserAvailailities(userId, availabilities);
     }
 
+    @GetMapping("/{userId}/tasks")
+    public ResponseEntity<List<TaskHistoryResponse>> getUserTask(@PathVariable String userId) {
+        return userService.getUserTask(userId);
+    }
 }
