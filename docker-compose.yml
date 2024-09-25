@@ -24,6 +24,8 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongodb
     depends_on:
       - mongodb
+    networks:
+      - microservices-net
 
   mail-dev:
     container_name: ms-mail-dev

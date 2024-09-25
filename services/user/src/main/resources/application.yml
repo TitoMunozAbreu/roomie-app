@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: user-service
+  config:
+    import: optional:configserver:http://localhost:8888
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/${keycloak.realm}
+
+keycloak:
+  realm: roomie_app
+  domain: localhost:9090
+  adminClientId: roomie_app
+  adminClientSecret: 635N5FnQbe99W2DE06BLSWu5Mb4rl7Ke
+  urls:
+    auth: http://${keycloak.domain}
+
