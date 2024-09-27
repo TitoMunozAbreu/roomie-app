@@ -1,0 +1,27 @@
+.home-page {
+    padding: 50px;
+  }
+  
+  .intro-section {
+    margin-bottom: 50px;
+    padding-bottom: 4%;
+  }
+  
+  .intro-image {
+    width: 100%;
+    height: auto;
+
+  }
+  
+  .features-section {
+    text-align: center;
+  }
+  
+  .features-section h2 {
+    margin-bottom: 30px;
+  }
+  
+  .ant-card {
+    text-align: center;
+  }
+  
