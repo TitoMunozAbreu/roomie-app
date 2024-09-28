@@ -1,0 +1,33 @@
+.home-page {
+    padding: 50px;
+  }
+  
+  .intro-section {
+    margin-bottom: 50px;
+    padding-bottom: 5%;
+  }
+  
+  .intro-image {
+    width: 100%;
+    height: auto;
+
+  }
+  
+  .features-section {
+    text-align: center;
+  }
+  
+  .features-section h2 {
+    margin-bottom: 30px;
+  }
+  
+  .ant-card {
+    text-align: center;
+  }
+
+  :where(.css-dev-only-do-not-override-5wsri9).ant-card .ant-card-cover  {
+    width: 50%;
+    display: -webkit-inline-box;
+    padding-top: 2%;
+  }
+  
