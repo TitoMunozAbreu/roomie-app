@@ -1,2 +1,4 @@
 #IntelliJ folders
 /.idea
+#VSCode folders
+/.vscode/
