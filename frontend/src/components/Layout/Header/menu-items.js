@@ -22,4 +22,8 @@ export const MENU_AUTH = [
     key: "3",
     label: "Notifications",
   },
+  {
+    key: "4",
+    label: "Logout",
+  },
 ];
