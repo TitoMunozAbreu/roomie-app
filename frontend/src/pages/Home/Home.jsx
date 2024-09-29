@@ -10,7 +10,6 @@ import { FEATURES } from "./fetures";
 export default function Home() {
   return (
     <div className="home-page">
-        
       {/* Section 1: rigth image and left some text*/}
       <section className="intro-section">
         <Row gutter={16} align="middle">
@@ -42,9 +41,8 @@ export default function Home() {
         </Divider>
         <Row gutter={16}>
           {FEATURES.map(({ key, title, description, image }) => (
-            <Col xs={24} md={8}>
+            <Col xs={24} md={8} key={key}>
               <Card
-                key={key}
                 hoverable
                 cover={
                   <img className="feature-image" alt={title} src={image} />

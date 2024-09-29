@@ -4,6 +4,7 @@ import "./Layout.css"
 
 import AppHeader from "./Header/Header.jsx";
 import AppFooter from "./Footer/Footer.jsx";
+import { Outlet } from "react-router-dom";
 
 const { Content } = Layout;
 
@@ -17,7 +18,7 @@ export default function AppLayout({ children }) {
       <AppHeader />
       <Content style={{ padding: "48px 48px" }}>
         <div id="content-background">
-          {children}
+          <Outlet />
         </div>
       </Content>
       <AppFooter />
