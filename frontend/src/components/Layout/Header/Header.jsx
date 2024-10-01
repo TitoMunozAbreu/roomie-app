@@ -26,6 +26,9 @@ export default function AppHeader() {
       case "notifications":
         navigate("/notifications");
         break;
+      case "profile":
+        navigate("/profile");
+        break;
       default:
         navigate("/");
     }

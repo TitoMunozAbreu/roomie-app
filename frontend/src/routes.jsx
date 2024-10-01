@@ -10,7 +10,7 @@ const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/home", element: <Home /> },
       {
-        path: "dashboard",
+        path: "/dashboard",
         element: (
           <PrivateRoute>
             <h2>dashboard</h2>
@@ -18,14 +18,14 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "notifications",
+        path: "/notifications",
         element: (
           <PrivateRoute>
             <h2>notifications</h2>
           </PrivateRoute>
         ),
       },
-      { path: "profile", element: <h2>profile</h2> },
+      { path: "/profile", element: <h2>profile</h2> },
     ],
   },
 ]);
