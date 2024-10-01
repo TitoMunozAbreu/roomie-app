@@ -1,12 +1,16 @@
 import "./App.css";
-import AppLayout from "./components/Layout/Layout.jsx";
-import Home from "./pages/Home/Home.jsx";
+import { ReactKeycloakProvider } from "@react-keycloak/web";
+import keycloakInst from "./keycloak.js";
+import { RouterProvider } from "react-router-dom";
+import router from "./routes.jsx";
+
+const initOptions = { onLoad: "login-required" };
 
 function App() {
   return (
-    <AppLayout>
-      <Home />
-    </AppLayout>
+    <ReactKeycloakProvider authClient={keycloakInst} initOptions={initOptions}>
+      <RouterProvider router={router} />
+    </ReactKeycloakProvider>
   );
 }
 

@@ -1,25 +1,29 @@
 export const MENU = [
   {
-    key: "1",
+    key: "home",
     label: "Home",
   },
   {
-    key: "2",
+    key: "login",
     label: "Login",
   },
 ];
 
 export const MENU_AUTH = [
   {
-    key: "1",
+    key: "dashboard",
     label: "Dashboard",
   },
   {
-    key: "2",
+    key: "profile",
     label: "Profile",
   },
   {
-    key: "3",
+    key: "notifications",
     label: "Notifications",
+  },
+  {
+    key: "logout",
+    label: "Logout",
   },
 ];
