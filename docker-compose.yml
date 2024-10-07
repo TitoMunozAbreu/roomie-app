@@ -38,7 +38,8 @@ services:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:21.1.1
     volumes:
-      - keycloak:/opt/jboss/keycloak/standalone/data
+      - keycloak:/opt/keycloak/data
+      - ./kc-providers:/opt/keycloak/providers
     environment:
       KEYCLOAK_ADMIN: roomie
       KEYCLOAK_ADMIN_PASSWORD: roomie

@@ -1,9 +1,9 @@
 package es.roomie.user.controller;
 
 import es.roomie.user.exceptions.UnAuthorizeUserException;
-import es.roomie.user.model.TaskHistory;
 import es.roomie.user.model.request.AvailabilityRequest;
 import es.roomie.user.model.request.TaskPreferenceRequest;
+import es.roomie.user.model.request.UserRequest;
 import es.roomie.user.model.response.AvailabilityResponse;
 import es.roomie.user.model.response.TaskHistoryResponse;
 import es.roomie.user.model.response.TaskPreferenceResponse;
@@ -32,6 +32,12 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> getUser(@PathVariable String userId) {
         return userService.getUserById(userId);
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> registerNewUser(@RequestBody UserRequest userRequest) {
+        userService.registerNewUser(userRequest.userId());
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{userId}/preferences")

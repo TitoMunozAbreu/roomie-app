@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
@@ -93,5 +94,15 @@ public class UserService {
             throw new ResourceNotFoundException("No task history found for the user.");
         }
         return new ResponseEntity<>(taskHistoryMapper.mapTaskHistoryResponse(userFound.getTaskHistories()), ACCEPTED);
+    }
+
+    public void registerNewUser(String userId) {
+        log.info("Check if exists userId {}", userId);
+        Optional<User> userFound = userRepository.findById(userId);
+        if(userFound.isEmpty()){
+            log.info("Register new user {}", userId);
+            User newUser = User.builder().id(userId).build();
+            userRepository.save(newUser);
+        }
     }
 }
