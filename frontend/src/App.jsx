@@ -4,7 +4,7 @@ import keycloakInst from "./keycloak.js";
 import { RouterProvider } from "react-router-dom";
 import router from "./routes.jsx";
 
-const initOptions = { onLoad: "login-required" };
+const initOptions = { onLoad: "check-sso" };
 
 function App() {
   return (

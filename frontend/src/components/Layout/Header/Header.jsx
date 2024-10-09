@@ -2,23 +2,72 @@ import "./Header.css";
 import logo from "../../../assets/images/logo.jpg";
 
 import { Layout, Menu } from "antd";
-import { MENU, MENU_AUTH } from "./menu-items";
 import { useKeycloak } from "@react-keycloak/web";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { UserOutlined } from "@ant-design/icons";
 
 const { Header } = Layout;
 
 export default function AppHeader() {
   const { keycloak, initialized } = useKeycloak();
+  const [userName, setUserName] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (keycloak.authenticated && initialized) {
+      keycloak
+        .loadUserProfile()
+        .then((profile) => {
+          setUserName(`${profile.firstName} ${profile.lastName}`);
+        })
+        .catch((err) => {
+          setUserName("user");
+        });
+    }
+  }, [keycloak, initialized]);
+
+  const MENU = [
+    {
+      key: "home",
+      label: "Home",
+    },
+    {
+      key: "login",
+      label: "Login",
+    },
+  ];
+
+  const MENU_AUTH = [
+    {
+      key: "dashboard",
+      label: "Dashboard",
+    },
+    {
+      key: "notifications",
+      label: "Notifications",
+    },
+    {
+      key: "profile",
+      label: <>{userName}</>,
+      icon: <UserOutlined />,
+      children: [
+        {
+          type: "group",
+          label: "user config",
+          children: [{ key: "logout", label: "Logout" }],
+        },
+      ],
+    },
+  ];
 
   const handleMenuClick = (selected) => {
     switch (selected.key) {
       case "login":
-        keycloak.login();
+        keycloak.login({redirectUri: "http://localhost:5173/dashboard"});
         break;
       case "logout":
-        keycloak.logout();
+        keycloak.logout({redirectUri: "http://localhost:5173/"});
         break;
       case "dashboard":
         navigate("/dashboard");
