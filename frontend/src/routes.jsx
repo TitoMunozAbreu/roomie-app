@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router-dom";
 import AppLayout from "./components/Layout/Layout";
 import PrivateRoute from "./helpers/private-route";
 import Home from "./pages/Home/Home.jsx";
+import Profile from "./pages/Profile/Profile.jsx";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -25,7 +27,14 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      { path: "/profile", element: <h2>profile</h2> },
+      {
+        path: "/profile",
+        element: (
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        ),
+      },
     ],
   },
 ]);

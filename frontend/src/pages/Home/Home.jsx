@@ -8,12 +8,22 @@ import cleanHouse from "../../assets/images/clean-house.jpg";
 import "./Home.css";
 
 export default function Home() {
-  const { navigate } = useNavigate();
-  const {keycloak} = useKeycloak();
+  const { keycloak } = useKeycloak();
 
   const handleSignIn = () => {
-    keycloak.login({redirectUri: "http://localhost:5173/dashboard"});  
+    keycloak.login({ redirectUri: "http://localhost:5173/dashboard" });
+  };
+
+  let btnSignIn = (
+    <Button type="primary" size="large" onClick={handleSignIn}>
+      Sign in
+    </Button>
+  );
+
+  if(keycloak.authenticated){
+    btnSignIn = <></>;
   }
+
   return (
     <div className="home-page">
       {/* Section 1: rigth image and left some text*/}
@@ -25,9 +35,7 @@ export default function Home() {
               Organize and assign tasks easily to save time and simplify your
               life.
             </p>
-            <Button type="primary" size="large" onClick={handleSignIn}>
-              Sign in
-            </Button>
+            {btnSignIn}
           </Col>
 
           <Col xs={24} md={12}>

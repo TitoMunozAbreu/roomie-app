@@ -5,7 +5,11 @@ import { Layout, Menu } from "antd";
 import { useKeycloak } from "@react-keycloak/web";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  LogoutOutlined,
+  ProfileOutlined,
+} from "@ant-design/icons";
 
 const { Header } = Layout;
 
@@ -48,15 +52,12 @@ export default function AppHeader() {
       label: "Notifications",
     },
     {
-      key: "profile",
+      key: "user",
       label: <>{userName}</>,
       icon: <UserOutlined />,
       children: [
-        {
-          type: "group",
-          label: "user config",
-          children: [{ key: "logout", label: "Logout" }],
-        },
+        { key: "profile", label: "profile", icon: <ProfileOutlined /> },
+        { key: "logout", label: "Logout", icon: <LogoutOutlined /> },
       ],
     },
   ];
@@ -64,10 +65,10 @@ export default function AppHeader() {
   const handleMenuClick = (selected) => {
     switch (selected.key) {
       case "login":
-        keycloak.login({redirectUri: "http://localhost:5173/dashboard"});
+        keycloak.login({ redirectUri: "http://localhost:5173/dashboard" });
         break;
       case "logout":
-        keycloak.logout({redirectUri: "http://localhost:5173/"});
+        keycloak.logout({ redirectUri: "http://localhost:5173/" });
         break;
       case "dashboard":
         navigate("/dashboard");
