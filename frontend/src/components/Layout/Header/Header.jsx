@@ -1,7 +1,7 @@
 import "./Header.css";
 import logo from "../../../assets/images/logo.jpg";
 
-import { Layout, Menu } from "antd";
+import { Layout, Menu, Spin } from "antd";
 import { useKeycloak } from "@react-keycloak/web";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +24,14 @@ export default function AppHeader() {
         .loadUserProfile()
         .then((profile) => {
           setUserName(`${profile.firstName} ${profile.lastName}`);
+          console.log(profile);
+          
+          const userData = {
+            userId: profile.id,
+            token: keycloak.token
+          }
+          localStorage.setItem('userData', JSON.stringify(userData));
+    
         })
         .catch((err) => {
           setUserName("user");

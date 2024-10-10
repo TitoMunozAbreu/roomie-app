@@ -1,52 +1,73 @@
 import "./Profile.css";
-import { Button, Descriptions, Divider, List, Avatar, Row, Col } from "antd";
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Descriptions,
+  Divider,
+  List,
+  Avatar,
+  Row,
+  Col,
+  Spin,
+} from "antd";
 import { HomeOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { useKeycloak } from "@react-keycloak/web";
 
-const taskPreference = [
-  {
-    label: "Clean kitchen",
-    children: "5",
-  },
-  {
-    label: "Throwm the trash",
-    children: "3",
-  },
-  {
-    label: "Mop the floor",
-    children: "1",
-  },
-];
-
-const availability = [
-  {
-    label: "Tuesday",
-    children: ["18:00", " 20:00"],
-  },
-  {
-    label: "Friday",
-    children: ["09:00", " 11:00"],
-  },
-  {
-    label: "Sunday",
-    children: ["20:00", " 22:00"],
-  },
-];
-
-const taskHistory = [
-  {
-    title: "Do Dishes",
-  },
-  {
-    title: "Do laundry",
-  },
-  {
-    title: "Clean the bathroom",
-  },
-];
 export default function Profile() {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const userData = JSON.parse(localStorage.getItem("userData"));
+      const response = await fetch(
+        `http://localhost:8085/api/v1/users/${userData.userId}`,
+        { headers: { Authorization: `Bearer ${userData.token}` } }
+      );
+      const respondeData = await response.json();
+      setUserData(respondeData);
+      setLoading(false);
+    }
+    fetchUser();
+  }, []);
+
+  if (loading)
+    return (
+      <Spin
+        size="large"
+        style={{ display: "flex", justifyContent: "center", marginTop: "10%" }}
+      />
+    );
+
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <>
       <div>
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Descriptions
+              className="userData"
+              bordered
+              column={{ xs: 1, sm: 1, md: 1, lg: 3, xl: 3, xxl: 3 }}
+              title="User info"
+              extra={
+                <Button variant="outlined" icon={<EditOutlined />}></Button>
+              }
+            />
+            <Descriptions.Item label="Name">
+              {userData.firstName}
+            </Descriptions.Item>
+            <Descriptions.Item label="Lastname">
+              {userData.lastName}
+            </Descriptions.Item>
+            <Descriptions.Item label="Email">
+              {userData.email}
+            </Descriptions.Item>
+          </Col>
+        </Row>
+        <Divider />
         <Row gutter={16}>
           <Col xs={24} md={12}>
             <div style={{ padding: "20px" }}>
@@ -65,8 +86,16 @@ export default function Profile() {
                     <Button variant="outlined" icon={<EditOutlined />}></Button>
                   </>
                 }
-                items={taskPreference}
               />
+              {userData.taskPreferences ? (
+                userData.taskPreferences.map((preference, index) => (
+                  <Descriptions.Item label={preference.taskname}>
+                    {preference.preference}
+                  </Descriptions.Item>
+                ))
+              ) : (
+                <Descriptions.Item label="">none</Descriptions.Item>
+              )}
             </div>
           </Col>
           <Col xs={24} md={12}>
@@ -86,8 +115,16 @@ export default function Profile() {
                     <Button variant="outlined" icon={<EditOutlined />}></Button>
                   </>
                 }
-                items={availability}
               />
+              {userData.availabilities ? (
+                userData.availabilities.map((availability, index) => (
+                  <Descriptions.Item label={availability.day}>
+                    {availability.hours}
+                  </Descriptions.Item>
+                ))
+              ) : (
+                <Descriptions.Item label="">none</Descriptions.Item>
+              )}
             </div>
           </Col>
         </Row>
@@ -98,13 +135,17 @@ export default function Profile() {
               <div className="taskHistory">Task history</div>
               <List
                 itemLayout="horizontal"
-                dataSource={taskHistory}
+                dataSource={
+                  userData.taskHistories
+                    ? userData.taskHistories
+                    : [{ title: "No task registered", description: "" }]
+                }
                 renderItem={(item, index) => (
                   <List.Item>
                     <List.Item.Meta
                       avatar={<Avatar icon={<HomeOutlined />} />}
                       title={<a href="https://ant.design">{item.title}</a>}
-                      description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                      description={item.description}
                     />
                   </List.Item>
                 )}
