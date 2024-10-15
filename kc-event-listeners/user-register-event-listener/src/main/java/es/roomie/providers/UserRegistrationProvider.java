@@ -43,8 +43,9 @@ public class UserRegistrationProvider implements EventListenerProvider {
 
     private void sendUserCreatedEventToBackend(Event event) {
         try {
+            String HOST_BACKEND = System.getenv("HOST_BACKEND");
             // URL del backend a la que quieres enviar el evento
-            URL url = new URL("http://192.168.0.12:8085/api/v1/users");
+            URL url = new URL("%s/api/v1/users".formatted(HOST_BACKEND));
 
             // Crear conexión HTTP
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
