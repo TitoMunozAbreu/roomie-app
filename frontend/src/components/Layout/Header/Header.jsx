@@ -24,13 +24,8 @@ export default function AppHeader() {
         .loadUserProfile()
         .then((profile) => {
           setUserName(`${profile.firstName} ${profile.lastName}`);
-          console.log(profile);
-          
-          const userData = {
-            userId: profile.id,
-            token: keycloak.token
-          }
-          localStorage.setItem('userData', JSON.stringify(userData));
+
+          localStorage.setItem('userAuth', profile.id);
     
         })
         .catch((err) => {
@@ -77,6 +72,7 @@ export default function AppHeader() {
         break;
       case "logout":
         keycloak.logout({ redirectUri: "http://localhost:5173/" });
+        localStorage.clear()
         break;
       case "dashboard":
         navigate("/dashboard");

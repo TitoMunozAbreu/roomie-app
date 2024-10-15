@@ -1,3 +1,6 @@
 export const ENDPOINTS = {
-    USER: '/users'
-}
+  USERS: {
+    URL: "http://localhost:8085",
+    getUsers: "/api/v1/users",
+  },
+};

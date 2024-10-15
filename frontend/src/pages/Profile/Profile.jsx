@@ -11,65 +11,69 @@ import {
   Spin,
 } from "antd";
 import { HomeOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-import { useKeycloak } from "@react-keycloak/web";
+import { userService } from "../../Service/user-service";
 
 export default function Profile() {
-  const [userData, setUserData] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchUser() {
-      const userData = JSON.parse(localStorage.getItem("userData"));
-      const response = await fetch(
-        `http://localhost:8085/api/v1/users/${userData.userId}`,
-        { headers: { Authorization: `Bearer ${userData.token}` } }
-      );
-      const respondeData = await response.json();
-      setUserData(respondeData);
+      const userId = localStorage.getItem("userAuth");
+      const userFound = await userService.getUser(userId)
+      setUser(userFound.data);
       setLoading(false);
     }
     fetchUser();
   }, []);
 
-  if (loading)
+  if (loading) {
     return (
       <Spin
         size="large"
         style={{ display: "flex", justifyContent: "center", marginTop: "10%" }}
       />
     );
+  }
 
-  if (error) return <div>Error: {error}</div>;
+  const hanldeEditPreferences = (preferences) => {
+    
+  }
 
   return (
     <>
       <div>
         <Row gutter={16}>
           <Col xs={24} md={12}>
-            <Descriptions
-              className="userData"
-              bordered
-              column={{ xs: 1, sm: 1, md: 1, lg: 3, xl: 3, xxl: 3 }}
-              title="User info"
-              extra={
-                <Button variant="outlined" icon={<EditOutlined />}></Button>
-              }
-            />
-            <Descriptions.Item label="Name">
-              {userData.firstName}
-            </Descriptions.Item>
-            <Descriptions.Item label="Lastname">
-              {userData.lastName}
-            </Descriptions.Item>
-            <Descriptions.Item label="Email">
-              {userData.email}
-            </Descriptions.Item>
+            {/* User info */}
+            <div style={{ padding: "20px" }}>
+              <Descriptions
+                className="userData"
+                bordered
+                column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
+                title="User info"
+                extra={
+                  <Button variant="outlined" icon={<EditOutlined />}></Button>
+                }
+              >
+                <Descriptions.Item label="Name">
+                  {user.firstName}
+                </Descriptions.Item>
+                <Descriptions.Item label="Lastname">
+                  {user.lastName}
+                </Descriptions.Item>
+                <Descriptions.Item label="Email">
+                  {user.email}
+                </Descriptions.Item>
+              </Descriptions>
+            </div>
           </Col>
         </Row>
         <Divider />
         <Row gutter={16}>
           <Col xs={24} md={12}>
+            {/* Preferences */}
             <div style={{ padding: "20px" }}>
               <Descriptions
                 className="preferences"
@@ -77,25 +81,31 @@ export default function Profile() {
                 column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
                 title="Preferences"
                 extra={
-                  <>
-                    <Button
-                      variant="outlined"
-                      icon={<PlusOutlined />}
-                      style={{ marginRight: "4px" }}
-                    ></Button>
-                    <Button variant="outlined" icon={<EditOutlined />}></Button>
-                  </>
+                  <Button
+                    variant="outlined"
+                    icon={
+                      user.taskPreferences !== null ? (
+                        <EditOutlined />
+                      ) : (
+                        <PlusOutlined />
+                      )
+                    }
+                    onClick={hanldeEditPreferences}
+                  ></Button>
                 }
-              />
-              {userData.taskPreferences ? (
-                userData.taskPreferences.map((preference, index) => (
-                  <Descriptions.Item label={preference.taskname}>
-                    {preference.preference}
+              >
+                {user.taskPreferences ? (
+                  user.taskPreferences.map((preference, index) => (
+                    <Descriptions.Item label={preference.taskname} key={index}>
+                      {preference.preference}
+                    </Descriptions.Item>
+                  ))
+                ) : (
+                  <Descriptions.Item label="">
+                    No preference set
                   </Descriptions.Item>
-                ))
-              ) : (
-                <Descriptions.Item label="">none</Descriptions.Item>
-              )}
+                )}
+              </Descriptions>
             </div>
           </Col>
           <Col xs={24} md={12}>
@@ -106,25 +116,30 @@ export default function Profile() {
                 column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
                 title="Availability"
                 extra={
-                  <>
-                    <Button
-                      variant="outlined"
-                      icon={<PlusOutlined />}
-                      style={{ marginRight: "4px" }}
-                    ></Button>
-                    <Button variant="outlined" icon={<EditOutlined />}></Button>
-                  </>
+                  <Button
+                    variant="outlined"
+                    icon={
+                      user.availabilities !== null ? (
+                        <EditOutlined />
+                      ) : (
+                        <PlusOutlined />
+                      )
+                    }
+                  ></Button>
                 }
-              />
-              {userData.availabilities ? (
-                userData.availabilities.map((availability, index) => (
-                  <Descriptions.Item label={availability.day}>
-                    {availability.hours}
+              >
+                {user.availabilities ? (
+                  user.availabilities.map((availability, index) => (
+                    <Descriptions.Item label={availability.day} key={index}>
+                      {availability.hours[0]} - {availability.hours[1]}
+                    </Descriptions.Item>
+                  ))
+                ) : (
+                  <Descriptions.Item label="">
+                    No availability set
                   </Descriptions.Item>
-                ))
-              ) : (
-                <Descriptions.Item label="">none</Descriptions.Item>
-              )}
+                )}
+              </Descriptions>
             </div>
           </Col>
         </Row>
@@ -136,8 +151,8 @@ export default function Profile() {
               <List
                 itemLayout="horizontal"
                 dataSource={
-                  userData.taskHistories
-                    ? userData.taskHistories
+                  user.taskHistories
+                    ? user.taskHistories
                     : [{ title: "No task registered", description: "" }]
                 }
                 renderItem={(item, index) => (
