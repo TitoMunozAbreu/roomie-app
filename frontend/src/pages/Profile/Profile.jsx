@@ -12,16 +12,21 @@ import {
 } from "antd";
 import { HomeOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { userService } from "../../Service/user-service";
+import UserModal from "../../components/Modal/user-modal.jsx";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [modalTitle, setModalTitle] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formType, setFormType] = useState("");
+  const [formData, setFormData] = useState(null);
 
   useEffect(() => {
     async function fetchUser() {
       const userId = localStorage.getItem("userAuth");
-      const userFound = await userService.getUser(userId)
+      const userFound = await userService.getUser(userId);
       setUser(userFound.data);
       setLoading(false);
     }
@@ -37,9 +42,18 @@ export default function Profile() {
     );
   }
 
-  const hanldeEditPreferences = (preferences) => {
-    
-  }
+  const hanldeEditPreferences = () => {
+    setModalTitle(
+      user.taskPreferences != null ? "Edit Preferences" : "Create Preferences"
+    );
+    setIsModalOpen(true);
+    setFormType("formPreferences");
+    setFormData(user.taskPreferences);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <>
@@ -96,7 +110,7 @@ export default function Profile() {
               >
                 {user.taskPreferences ? (
                   user.taskPreferences.map((preference, index) => (
-                    <Descriptions.Item label={preference.taskname} key={index}>
+                    <Descriptions.Item label={preference.taskName} key={index}>
                       {preference.preference}
                     </Descriptions.Item>
                   ))
@@ -168,6 +182,13 @@ export default function Profile() {
             </div>
           </Col>
         </Row>
+        <UserModal
+          title={modalTitle}
+          openModal={isModalOpen}
+          formType={formType}
+          data={formData}
+          onClose={handleCancel}
+        />
       </div>
     </>
   );
