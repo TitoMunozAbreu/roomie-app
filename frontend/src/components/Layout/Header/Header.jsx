@@ -1,6 +1,7 @@
 import "./Header.css";
 import logo from "../../../assets/images/logo.jpg";
-
+import { useDispatch, useSelector } from "react-redux";
+import { userActions } from "../../../store/reducers/user-slice";
 import { Layout, Menu } from "antd";
 import { useKeycloak } from "@react-keycloak/web";
 import { useEffect, useState } from "react";
@@ -15,24 +16,27 @@ const { Header } = Layout;
 
 export default function AppHeader() {
   const { keycloak, initialized } = useKeycloak();
-  const [userName, setUserName] = useState("");
+  const user = useSelector((state) => state.user.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (keycloak.authenticated && initialized) {
-      keycloak
-        .loadUserProfile()
-        .then((profile) => {
-          setUserName(`${profile.firstName} ${profile.lastName}`);
-
-          localStorage.setItem('userAuth', profile.id);
-    
-        })
-        .catch((err) => {
-          setUserName("user");
-        });
+      keycloak.loadUserProfile().then((profile) => {
+        dispatch(
+          userActions.updatedUser({
+            id: profile.id,
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            email: profile.email,
+            taskPreferences: null,
+            availabilities: null,
+            taskHistories: null
+          })
+        );
+      });
     }
-  }, [keycloak, initialized]);
+  }, [keycloak, initialized, dispatch]);
 
   const MENU = [
     {
@@ -56,7 +60,11 @@ export default function AppHeader() {
     },
     {
       key: "user",
-      label: <>{userName}</>,
+      label: (
+        <>
+          {user.firstName} {user.lastName}
+        </>
+      ),
       icon: <UserOutlined />,
       children: [
         { key: "profile", label: "profile", icon: <ProfileOutlined /> },
@@ -72,7 +80,8 @@ export default function AppHeader() {
         break;
       case "logout":
         keycloak.logout({ redirectUri: "http://localhost:5173/" });
-        localStorage.clear()
+        //dispatch(userActions.clearUser());
+        localStorage.clear();
         break;
       case "dashboard":
         navigate("/dashboard");

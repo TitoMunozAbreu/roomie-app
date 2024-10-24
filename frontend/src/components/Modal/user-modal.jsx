@@ -1,15 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Modal, Button } from "antd";
 import UserForm from "../Forms/user-form";
+import { useDispatch, useSelector } from "react-redux";
+import { uiActions } from "../../store/reducers/ui-slice";
 
-export default function userModal(props) {
-  const { openModal, title, formType, data, onClose } = props;
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function userModal() {
+  const dispatch = useDispatch();
+  const isModalOpen = useSelector((state) => state.ui.profile.modal.isOpen);
+  const modalTitle = useSelector((state) => state.ui.profile.modal.title);
+  const modalType = useSelector((state) => state.ui.profile.modal.type);
+
   const formRef = useRef(null);
 
   const handleCancel = () => {
-    setIsModalOpen(false);
-    onClose();
+    dispatch(uiActions.showModal());
     if (formRef.current) {
       formRef.current.restoreOriginalData();
     }
@@ -21,15 +25,10 @@ export default function userModal(props) {
     }
   };
 
-  useEffect(() => {
-    setIsModalOpen(openModal);
-  }, [openModal]);
-
-
   return (
     <Modal
       className="userModal"
-      title={title}
+      title={modalTitle}
       open={isModalOpen}
       onCancel={handleCancel}
       footer={[
@@ -37,11 +36,11 @@ export default function userModal(props) {
           Cancel
         </Button>,
         <Button key="submit" onClick={handleSendForm}>
-          {data ? "Edit" : "Create"}
+          Update
         </Button>,
       ]}
     >
-      <UserForm ref={formRef} formType={formType} data={data} />
+      <UserForm ref={formRef} formType={modalType} />
     </Modal>
   );
 }

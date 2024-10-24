@@ -13,182 +13,174 @@ import {
 import { HomeOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { userService } from "../../Service/user-service";
 import UserModal from "../../components/Modal/user-modal.jsx";
+import { useSelector, useDispatch } from "react-redux";
+import { uiActions } from "../../store/reducers/ui-slice";
+import { userActions } from "../../store/reducers/user-slice";
 
 export default function Profile() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [modalTitle, setModalTitle] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formType, setFormType] = useState("");
-  const [formData, setFormData] = useState(null);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
+  const isModalOpen = useSelector((state) => state.ui.profile.modal.isOpen);
+  const modalTitle = useSelector((state) => state.ui.profile.modal.title);
+  const modalType = useSelector((state) => state.ui.profile.modal.type);
+  const isLoading = useSelector((state) => state.ui.profile.isLoading);
 
   useEffect(() => {
     async function fetchUser() {
-      const userId = localStorage.getItem("userAuth");
-      const userFound = await userService.getUser(userId);
-      setUser(userFound.data);
-      setLoading(false);
+      //dispatch(uiActions.showLoading());
+      const response = await userService.getUser(user.id);
+      if (response) {
+        dispatch(userActions.updatedUser(response.data));
+        // dispatch(uiActions.showLoading());
+      }
     }
     fetchUser();
-  }, []);
-
-  if (loading) {
-    return (
-      <Spin
-        size="large"
-        style={{ display: "flex", justifyContent: "center", marginTop: "10%" }}
-      />
-    );
-  }
+  }, [dispatch]);
 
   const hanldeEditPreferences = () => {
-    setModalTitle(
-      user.taskPreferences != null ? "Edit Preferences" : "Create Preferences"
+    dispatch(uiActions.showModal())
+    dispatch(
+      uiActions.modalData({
+        title:
+          user.taskPreferences != null
+            ? "Edit Preferences"
+            : "Create Preferences",
+        type: "formPreferences",
+      })
     );
-    setIsModalOpen(true);
-    setFormType("formPreferences");
-    setFormData(user.taskPreferences);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
+  const userInfo = (
+    <div style={{ padding: "20px" }}>
+      <Descriptions
+        className="userData"
+        bordered
+        column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
+        title="User info"
+        extra={<Button variant="outlined" icon={<EditOutlined />}></Button>}
+      >
+        <Descriptions.Item label="Name">{user.firstName}</Descriptions.Item>
+        <Descriptions.Item label="Lastname">{user.lastName}</Descriptions.Item>
+        <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
+      </Descriptions>
+    </div>
+  );
 
-  return (
+  const preferences = (
+    <div style={{ padding: "20px" }}>
+      <Descriptions
+        className="preferences"
+        bordered
+        column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
+        title="Preferences"
+        extra={
+          <Button
+            variant="outlined"
+            icon={
+              user.taskPreferences !== null ? (
+                <EditOutlined />
+              ) : (
+                <PlusOutlined />
+              )
+            }
+            onClick={hanldeEditPreferences}
+          ></Button>
+        }
+      >
+        {user.taskPreferences !== null ? (
+          user.taskPreferences.map((preference, index) => (
+            <Descriptions.Item label={preference.taskName} key={index}>
+              {preference.preference}
+            </Descriptions.Item>
+          ))
+        ) : (
+          <Descriptions.Item label="">No preference set</Descriptions.Item>
+        )}
+      </Descriptions>
+    </div>
+  );
+
+  const availabilities = (
+    <div style={{ padding: "20px" }}>
+      <Descriptions
+        className="availability"
+        bordered
+        column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
+        title="Availability"
+        extra={
+          <Button
+            variant="outlined"
+            icon={
+              user.availabilities !== null ? <EditOutlined /> : <PlusOutlined />
+            }
+          ></Button>
+        }
+      >
+        {user.availabilities ? (
+          user.availabilities.map((availability, index) => (
+            <Descriptions.Item label={availability.day} key={index}>
+              {availability.hours[0]} - {availability.hours[1]}
+            </Descriptions.Item>
+          ))
+        ) : (
+          <Descriptions.Item label="">No availability set</Descriptions.Item>
+        )}
+      </Descriptions>
+    </div>
+  );
+
+  const taskHistory = (
+    <div style={{ padding: "20px" }}>
+      <div className="taskHistory">Task history</div>
+      <List
+        itemLayout="horizontal"
+        dataSource={
+          user.taskHistories
+            ? user.taskHistories.length
+            : [{ title: "No task registered", description: "" }]
+        }
+        renderItem={(item, index) => (
+          <List.Item>
+            <List.Item.Meta
+              avatar={<Avatar icon={<HomeOutlined />} />}
+              title={<a href="https://ant.design">{item.title}</a>}
+              description={item.description}
+            />
+          </List.Item>
+        )}
+      />
+    </div>
+  );
+
+  return isLoading ? (
+    <Spin
+      size="large"
+      style={{ display: "flex", justifyContent: "center", marginTop: "10%" }}
+    />
+  ) : (
     <>
       <div>
         <Row gutter={16}>
           <Col xs={24} md={12}>
-            {/* User info */}
-            <div style={{ padding: "20px" }}>
-              <Descriptions
-                className="userData"
-                bordered
-                column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
-                title="User info"
-                extra={
-                  <Button variant="outlined" icon={<EditOutlined />}></Button>
-                }
-              >
-                <Descriptions.Item label="Name">
-                  {user.firstName}
-                </Descriptions.Item>
-                <Descriptions.Item label="Lastname">
-                  {user.lastName}
-                </Descriptions.Item>
-                <Descriptions.Item label="Email">
-                  {user.email}
-                </Descriptions.Item>
-              </Descriptions>
-            </div>
+            {userInfo}
           </Col>
         </Row>
         <Divider />
         <Row gutter={16}>
           <Col xs={24} md={12}>
-            {/* Preferences */}
-            <div style={{ padding: "20px" }}>
-              <Descriptions
-                className="preferences"
-                bordered
-                column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
-                title="Preferences"
-                extra={
-                  <Button
-                    variant="outlined"
-                    icon={
-                      user.taskPreferences !== null ? (
-                        <EditOutlined />
-                      ) : (
-                        <PlusOutlined />
-                      )
-                    }
-                    onClick={hanldeEditPreferences}
-                  ></Button>
-                }
-              >
-                {user.taskPreferences ? (
-                  user.taskPreferences.map((preference, index) => (
-                    <Descriptions.Item label={preference.taskName} key={index}>
-                      {preference.preference}
-                    </Descriptions.Item>
-                  ))
-                ) : (
-                  <Descriptions.Item label="">
-                    No preference set
-                  </Descriptions.Item>
-                )}
-              </Descriptions>
-            </div>
+            {preferences}
           </Col>
           <Col xs={24} md={12}>
-            <div style={{ padding: "20px" }}>
-              <Descriptions
-                className="availability"
-                bordered
-                column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
-                title="Availability"
-                extra={
-                  <Button
-                    variant="outlined"
-                    icon={
-                      user.availabilities !== null ? (
-                        <EditOutlined />
-                      ) : (
-                        <PlusOutlined />
-                      )
-                    }
-                  ></Button>
-                }
-              >
-                {user.availabilities ? (
-                  user.availabilities.map((availability, index) => (
-                    <Descriptions.Item label={availability.day} key={index}>
-                      {availability.hours[0]} - {availability.hours[1]}
-                    </Descriptions.Item>
-                  ))
-                ) : (
-                  <Descriptions.Item label="">
-                    No availability set
-                  </Descriptions.Item>
-                )}
-              </Descriptions>
-            </div>
+            {availabilities}
           </Col>
         </Row>
         <Divider />
         <Row gutter={16}>
           <Col xs={24} md={12}>
-            <div style={{ padding: "20px" }}>
-              <div className="taskHistory">Task history</div>
-              <List
-                itemLayout="horizontal"
-                dataSource={
-                  user.taskHistories
-                    ? user.taskHistories
-                    : [{ title: "No task registered", description: "" }]
-                }
-                renderItem={(item, index) => (
-                  <List.Item>
-                    <List.Item.Meta
-                      avatar={<Avatar icon={<HomeOutlined />} />}
-                      title={<a href="https://ant.design">{item.title}</a>}
-                      description={item.description}
-                    />
-                  </List.Item>
-                )}
-              />
-            </div>
+            {taskHistory}
           </Col>
         </Row>
-        <UserModal
-          title={modalTitle}
-          openModal={isModalOpen}
-          formType={formType}
-          data={formData}
-          onClose={handleCancel}
-        />
+        <UserModal />
       </div>
     </>
   );
