@@ -13,7 +13,7 @@ keycloak:
   realm: roomie_app
   domain: localhost:9090
   adminClientId: roomie_app
-  adminClientSecret: 635N5FnQbe99W2DE06BLSWu5Mb4rl7Ke
+  adminClientSecret: j56HadsXhEppFHgbcQd4iG0qbhWYedTo
   urls:
     auth: http://${keycloak.domain}
 

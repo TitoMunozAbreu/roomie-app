@@ -1,18 +1,21 @@
 import { useKeycloak } from "@react-keycloak/web";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
+import { Spin } from "antd";
 
 const PrivateRoute = ({ children }) => {
-  const { keycloak } = useKeycloak();
+  const { keycloak, initialized } = useKeycloak();
+
+  if (!initialized) {
+    return (
+      <Spin
+        size="large"
+        style={{ display: "flex", justifyContent: "center", marginTop: "10%" }}
+      />
+    );
+  }
   const isLoggedIn = keycloak.authenticated;
-  // const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   if (!isLoggedIn) {
-  //     navigate("/"); // Redirige al login si no está autenticado
-  //   }
-  // }, [isLoggedIn, navigate]);
-
-  return isLoggedIn ? children : null; // Renderiza los hijos solo si está autenticado
+  return isLoggedIn ? children : <Navigate to="/" />;
 };
 
 export default PrivateRoute;

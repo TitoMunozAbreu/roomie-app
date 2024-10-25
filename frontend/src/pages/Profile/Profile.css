@@ -1,0 +1,20 @@
+.userData .preferences .availability {
+    .ant-descriptions-item-content, 
+    .ant-descriptions-item-label {
+      width: 50px;
+      white-space: normal;
+      word-break: break-word;
+    }
+}
+
+.taskHistory {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    flex: auto;
+    color: rgba(0, 0, 0, 0.88);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}

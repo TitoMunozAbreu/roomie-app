@@ -1,24 +1,86 @@
 import "./Header.css";
 import logo from "../../../assets/images/logo.jpg";
-
+import { useDispatch, useSelector } from "react-redux";
+import { userActions } from "../../../store/reducers/user-slice";
 import { Layout, Menu } from "antd";
-import { MENU, MENU_AUTH } from "./menu-items";
 import { useKeycloak } from "@react-keycloak/web";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  UserOutlined,
+  LogoutOutlined,
+  ProfileOutlined,
+} from "@ant-design/icons";
 
 const { Header } = Layout;
 
 export default function AppHeader() {
   const { keycloak, initialized } = useKeycloak();
+  const user = useSelector((state) => state.user.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (keycloak.authenticated && initialized) {
+      keycloak.loadUserProfile().then((profile) => {
+        dispatch(
+          userActions.updatedUser({
+            id: profile.id,
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            email: profile.email,
+            taskPreferences: [],
+            availabilities: [],
+            taskHistories: [],
+          })
+        );
+      });
+    }
+  }, [keycloak, initialized, dispatch]);
+
+  const MENU = [
+    {
+      key: "home",
+      label: "Home",
+    },
+    {
+      key: "login",
+      label: "Login",
+    },
+  ];
+
+  const MENU_AUTH = [
+    {
+      key: "dashboard",
+      label: "Dashboard",
+    },
+    {
+      key: "notifications",
+      label: "Notifications",
+    },
+    {
+      key: "user",
+      label: (
+        <>
+          {user.firstName} {user.lastName}
+        </>
+      ),
+      icon: <UserOutlined />,
+      children: [
+        { key: "profile", label: "profile", icon: <ProfileOutlined /> },
+        { key: "logout", label: "Logout", icon: <LogoutOutlined /> },
+      ],
+    },
+  ];
 
   const handleMenuClick = (selected) => {
     switch (selected.key) {
       case "login":
-        keycloak.login();
+        keycloak.login({ redirectUri: "http://localhost:5173/dashboard" });
         break;
       case "logout":
-        keycloak.logout();
+        keycloak.logout({ redirectUri: "http://localhost:5173/" });
+        localStorage.clear();
         break;
       case "dashboard":
         navigate("/dashboard");
