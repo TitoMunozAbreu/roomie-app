@@ -1,5 +1,5 @@
 import "./Profile.css";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Button,
   Descriptions,
@@ -16,29 +16,27 @@ import UserModal from "../../components/Modal/user-modal.jsx";
 import { useSelector, useDispatch } from "react-redux";
 import { uiActions } from "../../store/reducers/ui-slice";
 import { userActions } from "../../store/reducers/user-slice";
+import Notification from "../../components/Notification/Notification.jsx";
 
 export default function Profile() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
-  const isModalOpen = useSelector((state) => state.ui.profile.modal.isOpen);
-  const modalTitle = useSelector((state) => state.ui.profile.modal.title);
-  const modalType = useSelector((state) => state.ui.profile.modal.type);
   const isLoading = useSelector((state) => state.ui.profile.isLoading);
+  const notification = useSelector((state) => state.ui.notification);
 
   useEffect(() => {
     async function fetchUser() {
-      //dispatch(uiActions.showLoading());
-      const response = await userService.getUser(user.id);
-      if (response) {
-        dispatch(userActions.updatedUser(response.data));
-        // dispatch(uiActions.showLoading());
-      }
+      // dispatch(uiActions.showLoading());
+      return await userService.getUser(user.id);
     }
-    fetchUser();
+    fetchUser().then(function (response) {
+      dispatch(userActions.updatedUser(response.data));
+      // dispatch(uiActions.showLoading());
+    });
   }, [dispatch]);
 
   const hanldeEditPreferences = () => {
-    dispatch(uiActions.showModal())
+    dispatch(uiActions.showModal());
     dispatch(
       uiActions.modalData({
         title:
@@ -50,6 +48,29 @@ export default function Profile() {
     );
   };
 
+  const hanldeEditAvailabilities = () => {
+    dispatch(uiActions.showModal());
+    dispatch(
+      uiActions.modalData({
+        title:
+          user.availabilities != null
+            ? "Edit Availabilities"
+            : "Create Availabilities",
+        type: "formAvailabilities",
+      })
+    );
+  };
+
+  const hanldeEdituserInfo = () => {
+    dispatch(uiActions.showModal());
+    dispatch(
+      uiActions.modalData({
+        title: "Edit User",
+        type: "formUserInfo",
+      })
+    );
+  };
+
   const userInfo = (
     <div style={{ padding: "20px" }}>
       <Descriptions
@@ -57,7 +78,13 @@ export default function Profile() {
         bordered
         column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
         title="User info"
-        extra={<Button variant="outlined" icon={<EditOutlined />}></Button>}
+        extra={
+          <Button
+            variant="outlined"
+            icon={<EditOutlined />}
+            onClick={hanldeEdituserInfo}
+          ></Button>
+        }
       >
         <Descriptions.Item label="Name">{user.firstName}</Descriptions.Item>
         <Descriptions.Item label="Lastname">{user.lastName}</Descriptions.Item>
@@ -72,22 +99,16 @@ export default function Profile() {
         className="preferences"
         bordered
         column={{ xs: 1, sm: 1, md: 1, lg: 2, xl: 2, xxl: 2 }}
-        title="Preferences"
+        title="Task Preferences"
         extra={
           <Button
             variant="outlined"
-            icon={
-              user.taskPreferences !== null ? (
-                <EditOutlined />
-              ) : (
-                <PlusOutlined />
-              )
-            }
+            icon={user.taskPreferences ? <EditOutlined /> : <PlusOutlined />}
             onClick={hanldeEditPreferences}
           ></Button>
         }
       >
-        {user.taskPreferences !== null ? (
+        {user.taskPreferences ? (
           user.taskPreferences.map((preference, index) => (
             <Descriptions.Item label={preference.taskName} key={index}>
               {preference.preference}
@@ -110,9 +131,8 @@ export default function Profile() {
         extra={
           <Button
             variant="outlined"
-            icon={
-              user.availabilities !== null ? <EditOutlined /> : <PlusOutlined />
-            }
+            icon={user.availabilities ? <EditOutlined /> : <PlusOutlined />}
+            onClick={hanldeEditAvailabilities}
           ></Button>
         }
       >
@@ -136,7 +156,7 @@ export default function Profile() {
         itemLayout="horizontal"
         dataSource={
           user.taskHistories
-            ? user.taskHistories.length
+            ? user.taskHistories
             : [{ title: "No task registered", description: "" }]
         }
         renderItem={(item, index) => (
@@ -152,36 +172,41 @@ export default function Profile() {
     </div>
   );
 
-  return isLoading ? (
+  const showLoading = (
     <Spin
       size="large"
       style={{ display: "flex", justifyContent: "center", marginTop: "10%" }}
     />
-  ) : (
+  );
+  return (
     <>
-      <div>
-        <Row gutter={16}>
-          <Col xs={24} md={12}>
-            {userInfo}
-          </Col>
-        </Row>
-        <Divider />
-        <Row gutter={16}>
-          <Col xs={24} md={12}>
-            {preferences}
-          </Col>
-          <Col xs={24} md={12}>
-            {availabilities}
-          </Col>
-        </Row>
-        <Divider />
-        <Row gutter={16}>
-          <Col xs={24} md={12}>
-            {taskHistory}
-          </Col>
-        </Row>
-        <UserModal />
-      </div>
+      {isLoading && showLoading}
+      {notification?.type  && <Notification />}
+      <>
+        <div>
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              {userInfo}
+            </Col>
+          </Row>
+          <Divider />
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              {preferences}
+            </Col>
+            <Col xs={24} md={12}>
+              {availabilities}
+            </Col>
+          </Row>
+          <Divider />
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              {taskHistory}
+            </Col>
+          </Row>
+          <UserModal />
+        </div>
+      </>
     </>
   );
 }

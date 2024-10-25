@@ -29,9 +29,9 @@ export default function AppHeader() {
             firstName: profile.firstName,
             lastName: profile.lastName,
             email: profile.email,
-            taskPreferences: null,
-            availabilities: null,
-            taskHistories: null
+            taskPreferences: [],
+            availabilities: [],
+            taskHistories: [],
           })
         );
       });
@@ -80,7 +80,6 @@ export default function AppHeader() {
         break;
       case "logout":
         keycloak.logout({ redirectUri: "http://localhost:5173/" });
-        //dispatch(userActions.clearUser());
         localStorage.clear();
         break;
       case "dashboard":

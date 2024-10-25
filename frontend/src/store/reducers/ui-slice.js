@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { notification } from "antd";
 
 const initialState = {
   profile: {
@@ -11,6 +12,7 @@ const initialState = {
     },
     isLoading: false,
   },
+  notification: null,
 };
 
 const uiSlice = createSlice({
@@ -33,6 +35,18 @@ const uiSlice = createSlice({
     showLoading(state) {
       state.profile.isLoading = !state.profile.isLoading;
     },
+    showNotification(state, action) {
+      state.notification = {
+        type: action.payload.type,
+        message: action.payload.message,
+      };
+    },
+    clearNotification(state){
+      state.notification = {
+        type: '',
+        message: '',
+      };
+    }
   },
 });
 

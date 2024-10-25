@@ -50,14 +50,14 @@ public class UserController {
         return userService.updateUserPreferences(userId, taskPreferences);
     }
 
-    @PutMapping("/{userId}/availailities")
-    public ResponseEntity<List<AvailabilityResponse>> updateUserAvailailities(@AuthenticationPrincipal Jwt principal,
+    @PutMapping("/{userId}/availabilities")
+    public ResponseEntity<List<AvailabilityResponse>> updateUserAvailability(@AuthenticationPrincipal Jwt principal,
                                                                               @PathVariable String userId,
                                                                               @Valid @RequestBody List<AvailabilityRequest> availabilities){
         if(!principal.getSubject().equals(userId)) {
             throw new UnAuthorizeUserException("You do not have permissions to access this resource.");
         }
-        return userService.updateUserAvailailities(userId, availabilities);
+        return userService.updateUserAvailability(userId, availabilities);
     }
 
     @GetMapping("/{userId}/tasks")

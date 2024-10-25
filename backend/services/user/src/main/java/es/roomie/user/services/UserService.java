@@ -73,7 +73,7 @@ public class UserService {
         return new ResponseEntity<>(taskPreferenceResponses, ACCEPTED);
     }
 
-    public ResponseEntity<List<AvailabilityResponse>> updateUserAvailailities(String userId, List<AvailabilityRequest> availabilities) {
+    public ResponseEntity<List<AvailabilityResponse>> updateUserAvailability(String userId, List<AvailabilityRequest> availabilities) {
         User userFound = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
