@@ -1,13 +1,13 @@
-package es.roomie.homes;
+package es.roomie.household;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class HomesApplication {
+public class HouseholdApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(HomesApplication.class, args);
+		SpringApplication.run(HouseholdApplication.class, args);
 	}
 
 }
