@@ -47,4 +47,13 @@ public class HouseholdController {
         String userId = principal.getSubject();
         return  householdService.deleteMemberByHouseHold(householdId, userId, memberId);
     }
+
+    @DeleteMapping("/{householdId}")
+    public ResponseEntity<?> deleteHouseholdByID(@AuthenticationPrincipal Jwt principal,
+                                                 @PathVariable String householdId) {
+        String userId = principal.getSubject();
+        return householdService.deleteHouseholdById(householdId, userId);
+    }
+
+
 }

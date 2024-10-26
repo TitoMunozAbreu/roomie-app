@@ -5,7 +5,7 @@ spring:
       password: roomie
       host: localhost
       port: 27017
-      database: homes
+      database: household
       authentication-database: admin
 
 server:

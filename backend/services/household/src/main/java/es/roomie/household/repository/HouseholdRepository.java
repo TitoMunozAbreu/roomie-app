@@ -12,8 +12,8 @@ import java.util.Optional;
 public interface HouseholdRepository extends MongoRepository<Household, String> {
 
     @Query("{'members.userId':  ?0}")
-    List<Household> findHouseHoldsByMemberUserId(String userId);
+    List<Household> findByMembersUserId(String userId);
 
     @Query("{ '_id': ?0, 'members': { '$elemMatch': { 'userId': ?1, 'role': 'admin' } } }")
-    Optional<Household> findHouseHoldsByIdAndMemberIdRoleAdmin(String householdId, String userId);
+    Optional<Household> findByIdAndMembersUserIdAndMembersRole(String householdId, String userId);
 }

@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class HouseholdResponse {
-    private String _id;
+    private String id;
     private String householdName;
     private List<Member> members;
     private List<Task> tasks;

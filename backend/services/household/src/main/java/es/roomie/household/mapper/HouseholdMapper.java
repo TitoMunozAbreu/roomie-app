@@ -9,6 +9,7 @@ import org.mapstruct.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface HouseholdMapper {
@@ -24,6 +25,7 @@ public interface HouseholdMapper {
 
     @AfterMapping
     default void assignDefaultRole(@MappingTarget Household household, HouseholdRequest householdRequest) {
+        household.setId(UUID.randomUUID().toString());
         String userID = householdRequest.userId();
 
         if (household.getMembers() == null || household.getMembers().isEmpty()) {
@@ -32,6 +34,7 @@ public interface HouseholdMapper {
             members.add(Member.builder()
                     .userId(userID)
                     .role(Role.admin)
+                    .invitationAccepted(true)
                     .build());
         }
     }

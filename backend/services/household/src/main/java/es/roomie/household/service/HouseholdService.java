@@ -20,7 +20,7 @@ import static es.roomie.household.config.enums.Role.member;
 import static org.springframework.http.HttpStatus.*;
 
 @Service
-@Transactional
+@Transactional(rollbackFor = {ResourceNotFoundException.class, ForbiddenUserException.class})
 @Slf4j
 public class HouseholdService {
     private final HouseholdMapper householdMapper;
@@ -34,17 +34,18 @@ public class HouseholdService {
     public ResponseEntity<HouseholdResponse> createHousehold(HouseholdRequest householRequest) {
         log.info("Create new household group");
         Household newHousehold = householdMapper.mapToHousehold(householRequest);
+
         householdRepository.insert(newHousehold);
 
         //TODO: send message to notification-service "new home created"
         log.info("Sent notification to user...");
 
-        return new ResponseEntity<HouseholdResponse>(householdMapper.mapToHouseHoldResponse(newHousehold), CREATED);
+        return new ResponseEntity<>(householdMapper.mapToHouseHoldResponse(newHousehold), CREATED);
     }
 
     public ResponseEntity<List<HouseholdResponse>> getHouseholds(String userId) {
         log.info("Fetch households");
-        List<Household> houseHoldsByMemberUserId = householdRepository.findHouseHoldsByMemberUserId(userId);
+        List<Household> houseHoldsByMemberUserId = householdRepository.findByMembersUserId(userId);
 
         if (houseHoldsByMemberUserId.isEmpty()) {
             throw new ResourceNotFoundException("No households found for the specified user.");
@@ -60,7 +61,7 @@ public class HouseholdService {
 
     public ResponseEntity<HouseholdResponse> updateMembersByHouseholdId(String householdId, String userId, List<String> memberIds) {
         log.info("Fetch household");
-        Household householdFound = householdRepository.findHouseHoldsByIdAndMemberIdRoleAdmin(householdId, userId)
+        Household householdFound = householdRepository.findByIdAndMembersUserIdAndMembersRole(householdId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No household found for the specified user."));
 
         log.info("Update household members");
@@ -88,9 +89,7 @@ public class HouseholdService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("No such member found."));
 
-        boolean isMemberAdmin = householdFound.getMembers().stream()
-                .anyMatch(member -> member.getUserId().equals(userId) &&
-                        member.getRole().equals(Role.admin));
+        boolean isMemberAdmin = isMemberAdmin(userId, householdFound);
 
         boolean isSelfRemoval = userId.equals(memberId);
 
@@ -105,4 +104,31 @@ public class HouseholdService {
         householdRepository.save(householdFound);
         return new ResponseEntity<>(householdMapper.mapToHouseHoldResponse(householdFound), OK);
     }
+
+    public ResponseEntity<?> deleteHouseholdById(String householdId, String userId) {
+        Household householdFound = householdRepository.findById(householdId)
+                .orElseThrow(() -> new ResourceNotFoundException("No household found."));
+
+        boolean isMemberAdmin = isMemberAdmin(userId, householdFound);
+
+        if (!isMemberAdmin) {
+            throw new ResourceNotFoundException("Member not found or lacks permissions to access this resource.");
+        }
+
+        householdRepository.delete(householdFound);
+
+        //TODO: send request to task-service: "deleteTasksByHouseholdId"
+        log.info("Sent request to task-service...");
+        //TODO: send message to notification-service "deleted household"
+        log.info("Sent notification to user...");
+
+        return new ResponseEntity<>(OK);
+    }
+
+    private static boolean isMemberAdmin(String userId, Household householdFound) {
+        return householdFound.getMembers().stream()
+                .anyMatch(member -> member.getUserId().equals(userId) &&
+                        member.getRole().equals(Role.admin));
+    }
+
 }

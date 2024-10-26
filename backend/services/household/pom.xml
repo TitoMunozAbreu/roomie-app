@@ -11,8 +11,8 @@
 	<groupId>es.roomie</groupId>
 	<artifactId>household</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>homes</name>
-	<description>homes</description>
+	<name>household</name>
+	<description>household</description>
 	<url/>
 	<licenses>
 		<license/>
