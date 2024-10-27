@@ -1,6 +1,5 @@
 package es.roomie.household.service;
 
-import es.roomie.household.config.enums.Role;
 import es.roomie.household.exceptions.ForbiddenUserException;
 import es.roomie.household.exceptions.ResourceNotFoundException;
 import es.roomie.household.mapper.HouseholdMapper;
@@ -16,8 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static es.roomie.household.config.enums.Role.admin;
 import static es.roomie.household.config.enums.Role.member;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 @Service
 @Transactional(rollbackFor = {ResourceNotFoundException.class, ForbiddenUserException.class})
@@ -64,18 +65,32 @@ public class HouseholdService {
         Household householdFound = householdRepository.findByIdAndMembersUserIdAndMembersRole(householdId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No household found for the specified user."));
 
-        log.info("Update household members");
-        memberIds.forEach(memberId -> householdFound.getMembers()
-                .add(Member.builder()
-                        .userId(memberId)
+        List<Member> nonAdminMembers = householdFound.getMembers().stream()
+                .filter(member -> !member.getRole().equals(admin))
+                .toList();
+
+        List<Member> removedMembers = nonAdminMembers.stream()
+                .filter(member -> !memberIds.contains(member.getUserId()))
+                .toList();
+
+        householdFound.getMembers().removeIf(removedMembers::contains);
+
+        List<Member> newMembers = memberIds.stream()
+                .filter(id -> householdFound.getMembers().stream().noneMatch(currentMember -> currentMember.getUserId().equals(id)))
+                .map(id -> Member.builder()
+                        .userId(id)
                         .role(member)
                         .invitationAccepted(false)
                         .build())
-        );
+                .toList();
+
+        householdFound.getMembers().addAll(newMembers);
+
         householdRepository.save(householdFound);
 
         //TODO: send message to notification-service "User added to a household"
-        log.info("Sent notification to user...");
+        //TODO: send message to notification-service "User deleted from household"
+        log.info("Sent notification to users...");
 
         return new ResponseEntity<>(householdMapper.mapToHouseHoldResponse(householdFound), OK);
     }
@@ -99,7 +114,7 @@ public class HouseholdService {
 
         log.info("Delete household member");
         householdFound.getMembers()
-                .removeIf(member -> member.getUserId().equals(userId));
+                .removeIf(member -> member.getUserId().equals(memberId));
 
         householdRepository.save(householdFound);
         return new ResponseEntity<>(householdMapper.mapToHouseHoldResponse(householdFound), OK);
@@ -122,13 +137,13 @@ public class HouseholdService {
         //TODO: send message to notification-service "deleted household"
         log.info("Sent notification to user...");
 
-        return new ResponseEntity<>(OK);
+        return new ResponseEntity<>("Deleted household",OK);
     }
 
     private static boolean isMemberAdmin(String userId, Household householdFound) {
         return householdFound.getMembers().stream()
                 .anyMatch(member -> member.getUserId().equals(userId) &&
-                        member.getRole().equals(Role.admin));
+                        member.getRole().equals(admin));
     }
 
 }
