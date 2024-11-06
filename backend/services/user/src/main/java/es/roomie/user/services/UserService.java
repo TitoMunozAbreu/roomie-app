@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
@@ -49,6 +50,22 @@ public class UserService {
         this.taskPreferenceMapper = taskPreferenceMapper;
         this.availabilityMapper = availabilityMapper;
         this.taskHistoryMapper = taskHistoryMapper;
+    }
+
+    public ResponseEntity<List<UserResponse>> getAllUsers(Set<String> userIds) {
+        log.info("Get all users ids {}", userIds);
+
+        List<UserResponse> users = userIds.stream()
+                .map(keycloakService::getUserById)
+                .map(userRepresentation -> UserResponse.builder()
+                        .id(userRepresentation.getId())
+                        .firstName(userRepresentation.getFirstName())
+                        .lastName(userRepresentation.getLastName())
+                        .email(userRepresentation.getEmail())
+                        .build())
+                .toList();
+
+        return new ResponseEntity<>(users, OK);
     }
 
     public ResponseEntity<UserResponse> getUserById(String userId) {

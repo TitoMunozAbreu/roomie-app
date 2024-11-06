@@ -1,20 +1,15 @@
 package es.roomie.household.model.response;
 
-import es.roomie.household.model.response.feign.Task;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class HouseholdResponse {
+public class HouseholdNameResponse {
     private String id;
     private String householdName;
-    private List<MemberResponse> members;
-    private List<Task> tasks;
 }

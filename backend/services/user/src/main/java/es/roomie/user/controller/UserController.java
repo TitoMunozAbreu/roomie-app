@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -27,6 +28,11 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> getAllUsers(@RequestParam(required = true) Set<String> userIds) {
+        return userService.getAllUsers(userIds);
     }
 
     @GetMapping("/{userId}")

@@ -5,15 +5,23 @@ import es.roomie.household.exceptions.ResourceNotFoundException;
 import es.roomie.household.mapper.HouseholdMapper;
 import es.roomie.household.model.Household;
 import es.roomie.household.model.Member;
+import es.roomie.household.model.feign.UserResponse;
+import es.roomie.household.model.response.HouseholdNameResponse;
 import es.roomie.household.model.response.HouseholdResponse;
+import es.roomie.household.model.response.MemberResponse;
 import es.roomie.household.model.resquest.HouseholdRequest;
 import es.roomie.household.repository.HouseholdRepository;
+import es.roomie.household.service.client.feign.UserClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static es.roomie.household.config.enums.Role.admin;
 import static es.roomie.household.config.enums.Role.member;
@@ -26,10 +34,12 @@ import static org.springframework.http.HttpStatus.OK;
 public class HouseholdService {
     private final HouseholdMapper householdMapper;
     private final HouseholdRepository householdRepository;
+    private final UserClient userClient;
 
-    public HouseholdService(HouseholdMapper householdMapper, HouseholdRepository householdRepository) {
+    public HouseholdService(HouseholdMapper householdMapper, HouseholdRepository householdRepository, UserClient userClient) {
         this.householdMapper = householdMapper;
         this.householdRepository = householdRepository;
+        this.userClient = userClient;
     }
 
     public ResponseEntity<HouseholdResponse> createHousehold(HouseholdRequest householRequest) {
@@ -54,6 +64,8 @@ public class HouseholdService {
 
         List<HouseholdResponse> householdResponses = householdMapper.mapToHouseholdResponse(houseHoldsByMemberUserId);
 
+        getMembersDataFromHouseholds(householdResponses);
+
         //TODO: get task from task-service
         log.info("Get task by household from task-service...");
 
@@ -62,7 +74,7 @@ public class HouseholdService {
 
     public ResponseEntity<HouseholdResponse> updateMembersByHouseholdId(String householdId, String userId, List<String> memberIds) {
         log.info("Fetch household");
-        Household householdFound = householdRepository.findByIdAndMembersUserIdAndMembersRole(householdId, userId)
+        Household householdFound = householdRepository.findByIdAndMembersUserIdAndMembersRoleAdmin(householdId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No household found for the specified user."));
 
         List<Member> nonAdminMembers = householdFound.getMembers().stream()
@@ -88,11 +100,15 @@ public class HouseholdService {
 
         householdRepository.save(householdFound);
 
-        //TODO: send message to notification-service "User added to a household"
-        //TODO: send message to notification-service "User deleted from household"
+        HouseholdResponse householdResponse = householdMapper.mapToHouseHoldResponse(householdFound);
+
+        getMembersDataFromHousehold(householdResponse);
+
+        //TODO: send message to notification-service "UserResponse added to a household"
+        //TODO: send message to notification-service "UserResponse deleted from household"
         log.info("Sent notification to users...");
 
-        return new ResponseEntity<>(householdMapper.mapToHouseHoldResponse(householdFound), OK);
+        return new ResponseEntity<>(householdResponse, OK);
     }
 
     public ResponseEntity<HouseholdResponse> deleteMemberByHouseHold(String householdId, String userId, String memberId) {
@@ -117,7 +133,12 @@ public class HouseholdService {
                 .removeIf(member -> member.getUserId().equals(memberId));
 
         householdRepository.save(householdFound);
-        return new ResponseEntity<>(householdMapper.mapToHouseHoldResponse(householdFound), OK);
+
+        HouseholdResponse householdResponse = householdMapper.mapToHouseHoldResponse(householdFound);
+
+        getMembersDataFromHousehold(householdResponse);
+
+        return new ResponseEntity<>(householdResponse, OK);
     }
 
     public ResponseEntity<?> deleteHouseholdById(String householdId, String userId) {
@@ -146,4 +167,71 @@ public class HouseholdService {
                         member.getRole().equals(admin));
     }
 
+    private List<HouseholdResponse> getMembersDataFromHouseholds(List<HouseholdResponse> householdResponses) {
+
+        Set<String> membersIds = householdResponses.stream()
+                .flatMap(households -> households.getMembers().stream())
+                .map(MemberResponse::getUserId)
+                .collect(Collectors.toSet());
+
+        log.info("Fetch from user-service members info by Ids {}", membersIds);
+        //get Members info from user-service:
+        List<UserResponse> users = userClient.getUsers(membersIds).getBody();
+
+        if(users != null && !users.isEmpty()) {
+            Map<String, UserResponse> userResponseMap = users.stream()
+                    .collect(Collectors.toMap(UserResponse::id, Function.identity()));
+
+            for( HouseholdResponse householdResponse : householdResponses) {
+
+                List<MemberResponse> memberResponses = householdResponse.getMembers().stream()
+                        .map(member -> {
+                            UserResponse userResponse = userResponseMap.get(member.getUserId());
+                            return HouseholdMapper.mapUsersToMemberResponse(member, userResponse);
+                        })
+                        .toList();
+
+                householdResponse.setMembers(memberResponses);
+            }
+        }
+        return householdResponses;
+    }
+
+    private HouseholdResponse getMembersDataFromHousehold(HouseholdResponse householdResponse) {
+
+        Set<String> membersIds = householdResponse.getMembers().stream()
+                .map(MemberResponse::getUserId)
+                .collect(Collectors.toSet());
+
+        log.info("Fetch from user-service members info by Ids {}", membersIds);
+        //get Members info from user-service:
+        List<UserResponse> users = userClient.getUsers(membersIds).getBody();
+
+        if(users != null && !users.isEmpty()) {
+            Map<String, UserResponse> userResponseMap = users.stream()
+                    .collect(Collectors.toMap(UserResponse::id, Function.identity()));
+
+                List<MemberResponse> memberResponses = householdResponse.getMembers().stream()
+                        .map(member -> {
+                            UserResponse userResponse = userResponseMap.get(member.getUserId());
+                            return HouseholdMapper.mapUsersToMemberResponse(member, userResponse);
+                        })
+                        .toList();
+
+                householdResponse.setMembers(memberResponses);
+        }
+        return householdResponse;
+    }
+
+    public ResponseEntity<HouseholdNameResponse> updateHouseholdName(String householdId, String userId, String name) {
+        Household household = householdRepository.findByIdAndMemberUserId(householdId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found or lacks permissions to access this resource."));
+
+        log.info("Updating household name");
+        household.setHouseholdName(name);
+        householdRepository.save(household);
+
+        return new ResponseEntity<>(householdMapper.mapToHouseholdNameResponse(household), OK);
+
+    }
 }

@@ -15,5 +15,8 @@ public interface HouseholdRepository extends MongoRepository<Household, String> 
     List<Household> findByMembersUserId(String userId);
 
     @Query("{ '_id': ?0, 'members': { '$elemMatch': { 'userId': ?1, 'role': 'admin' } } }")
-    Optional<Household> findByIdAndMembersUserIdAndMembersRole(String householdId, String userId);
+    Optional<Household> findByIdAndMembersUserIdAndMembersRoleAdmin(String householdId, String userId);
+
+    @Query("{ '_id':  ?0, 'members': { '$elemMatch' :  { 'userId': ?1 } } }")
+    Optional<Household> findByIdAndMemberUserId(String householdId, String userId);
 }
