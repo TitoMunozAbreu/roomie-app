@@ -3,6 +3,8 @@ import AppLayout from "./components/Layout/Layout";
 import PrivateRoute from "./helpers/private-route";
 import Home from "./pages/Home/Home.jsx";
 import Profile from "./pages/Profile/Profile.jsx";
+import Dashboard from "./pages/Dashboard/Dashboard.jsx";
+import Groups from "./pages/Groups/Groups.jsx";
 
 const router = createBrowserRouter([
   {
@@ -15,7 +17,15 @@ const router = createBrowserRouter([
         path: "/dashboard",
         element: (
           <PrivateRoute>
-            <h2>dashboard</h2>
+            <Dashboard />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/groups",
+        element: (
+          <PrivateRoute>
+            <Groups />
           </PrivateRoute>
         ),
       },

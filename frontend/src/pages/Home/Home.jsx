@@ -2,10 +2,9 @@ import React from "react";
 import { Row, Col, Button, Card } from "antd";
 import { Divider } from "antd";
 import { FEATURES } from "./fetures";
-import { useNavigate } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
 import cleanHouse from "../../assets/images/clean-house.jpg";
-import "./Home.css";
+import styles from "./Home.module.css";
 
 export default function Home() {
   const { keycloak } = useKeycloak();
@@ -25,9 +24,9 @@ export default function Home() {
   }
 
   return (
-    <div className="home-page">
+    <div className={styles.homePage}>
       {/* Section 1: rigth image and left some text*/}
-      <section className="intro-section">
+      <section className={styles.introSection}>
         <Row gutter={16} align="middle">
           <Col xs={24} md={12}>
             <h1>Manage Your Household Tasks</h1>
@@ -42,14 +41,14 @@ export default function Home() {
             <img
               src={cleanHouse}
               alt="Tareas del hogar"
-              className="intro-image"
+              className={styles.introImage}
             />
           </Col>
         </Row>
       </section>
 
       {/* Section 2: Three main features */}
-      <section className="features-section">
+      <section className={styles.featuresSection}>
         <Divider plain>
           <h2>Main Features</h2>
         </Divider>
@@ -57,9 +56,10 @@ export default function Home() {
           {FEATURES.map(({ key, title, description, image }) => (
             <Col xs={24} md={8} key={key}>
               <Card
+              className={styles.customCard}
                 hoverable
                 cover={
-                  <img className="feature-image" alt={title} src={image} />
+                  <img className={styles.featureImage} alt={title} src={image} />
                 }
               >
                 <Card.Meta title={title} description={description} />
