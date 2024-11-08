@@ -1,0 +1,12 @@
+.contentBackground {
+    padding: 24px;
+    min-height: 380px;
+    background: rgb(255, 255, 255);
+    border-radius: 8px;
+}
+
+.appLayout {
+    display: grid;
+    min-height: 100dvh;
+    grid-template-rows: auto 1fr auto;
+}

@@ -1,6 +1,6 @@
 import { Layout, theme } from "antd";
 
-import "./Layout.css"
+import styles from "../Layout/Layout.module.css";
 
 import AppHeader from "./Header/Header.jsx";
 import AppFooter from "./Footer/Footer.jsx";
@@ -14,10 +14,10 @@ export default function AppLayout({ children }) {
   } = theme.useToken();
 
   return (
-    <Layout id="app-layout">
+    <Layout className={styles.appLayout}>
       <AppHeader />
       <Content style={{ padding: "48px 48px" }}>
-        <div id="content-background">
+        <div className={styles.contentBackground}>
           <Outlet />
         </div>
       </Content>

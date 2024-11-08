@@ -13,6 +13,7 @@ const initialState = {
     isLoading: false,
   },
   notification: null,
+  errorMessage: null,
 };
 
 const uiSlice = createSlice({
@@ -41,12 +42,15 @@ const uiSlice = createSlice({
         message: action.payload.message,
       };
     },
-    clearNotification(state){
+    clearNotification(state) {
       state.notification = {
-        type: '',
-        message: '',
+        type: "",
+        message: "",
       };
-    }
+    },
+    updateErrorMessage(state, action) {
+      state.errorMessage = action.payload;
+    },
   },
 });
 

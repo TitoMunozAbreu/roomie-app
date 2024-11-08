@@ -8,8 +8,28 @@ const householdSlice = createSlice({
   name: "household",
   initialState: initialState,
   reducers: {
-    setHouseholds(state, action) {       
+    setHouseholds(state, action) {
       state.households = action.payload;
+    },
+    updateHouseholdName(state, action) {
+      if (state.households) {
+        const household = state.households.find(
+          (h) => h.id === action.payload.id
+        );
+        if (household) {
+          household.householdName = action.payload.householdName;
+        }
+      }
+    },
+    updateHouseholdMembers(state, action) {
+      if (state.households) {
+        const household = state.households.find(
+          (h) => h.id === action.payload.id
+        );
+        if (household) {
+          household.members = action.payload.members;
+        }
+      }
     },
   },
 });

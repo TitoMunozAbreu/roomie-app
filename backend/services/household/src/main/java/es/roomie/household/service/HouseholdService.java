@@ -59,7 +59,7 @@ public class HouseholdService {
         List<Household> houseHoldsByMemberUserId = householdRepository.findByMembersUserId(userId);
 
         if (houseHoldsByMemberUserId.isEmpty()) {
-            throw new ResourceNotFoundException("No households found for the specified user.");
+            throw new ResourceNotFoundException("No households found.");
         }
 
         List<HouseholdResponse> householdResponses = householdMapper.mapToHouseholdResponse(houseHoldsByMemberUserId);
