@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class Member {
     private String userId;
+    private String email;
     private Role role;
     private boolean invitationAccepted;
 }

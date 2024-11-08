@@ -19,5 +19,5 @@ public interface UserClient {
     @GetMapping(
             consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
-    ResponseEntity<List<UserResponse>> getUsers(@RequestParam(required = true) Set<String> userIds);
+    ResponseEntity<List<UserResponse>> getUsers(@RequestParam(required = true) Set<String> userEmails);
 }

@@ -41,10 +41,10 @@ public class HouseholdController {
     @PutMapping("/{householdId}/members")
     public ResponseEntity<HouseholdResponse> updateMembersByHouseholdId(@AuthenticationPrincipal Jwt principal,
                                                                         @PathVariable String householdId,
-                                                                        @RequestParam List<String> memberIds) {
-        String userId = principal.getSubject();
+                                                                        @RequestParam List<String> memberEmails) {
+        String admimMemberId = principal.getSubject();
         tokenService.setToken(principal.getTokenValue());
-        return householdService.updateMembersByHouseholdId(householdId,userId, memberIds);
+        return householdService.updateMembersByHouseholdId(householdId, admimMemberId, memberEmails);
     }
 
     @PutMapping("/{householdId}")
@@ -59,19 +59,20 @@ public class HouseholdController {
         return householdService.updateHouseholdName(householdId, userId, name);
     }
 
-    @DeleteMapping("/{householdId}/members/{memberId}")
+    @DeleteMapping("/{householdId}/members/{memberEmail}")
     public ResponseEntity<HouseholdResponse> deleteMemberByHouseholdId(@AuthenticationPrincipal Jwt principal,
                                                                        @PathVariable String householdId,
-                                                                       @PathVariable String memberId) {
+                                                                       @PathVariable String memberEmail) {
         String userId = principal.getSubject();
+        String adminMemberEmail = principal.getClaim("email");
         tokenService.setToken(principal.getTokenValue());
-        return  householdService.deleteMemberByHouseHold(householdId, userId, memberId);
+        return  householdService.deleteMemberByHouseHold(householdId, adminMemberEmail, memberEmail);
     }
 
     @DeleteMapping("/{householdId}")
     public ResponseEntity<?> deleteHouseholdByID(@AuthenticationPrincipal Jwt principal,
                                                  @PathVariable String householdId) {
-        String userId = principal.getSubject();
-        return householdService.deleteHouseholdById(householdId, userId);
+        String email = principal.getClaim("email");
+        return householdService.deleteHouseholdById(householdId, email);
     }
 }

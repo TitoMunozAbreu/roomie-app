@@ -72,9 +72,9 @@ public class HouseholdService {
         return new ResponseEntity<>(householdResponses, OK);
     }
 
-    public ResponseEntity<HouseholdResponse> updateMembersByHouseholdId(String householdId, String userId, List<String> memberIds) {
+    public ResponseEntity<HouseholdResponse> updateMembersByHouseholdId(String householdId, String adminMemberId, List<String> memberEmails) {
         log.info("Fetch household");
-        Household householdFound = householdRepository.findByIdAndMembersUserIdAndMembersRoleAdmin(householdId, userId)
+        Household householdFound = householdRepository.findByIdAndMembersUserIdAndMembersRoleAdmin(householdId, adminMemberId)
                 .orElseThrow(() -> new ResourceNotFoundException("No household found for the specified user."));
 
         List<Member> nonAdminMembers = householdFound.getMembers().stream()
@@ -82,15 +82,15 @@ public class HouseholdService {
                 .toList();
 
         List<Member> removedMembers = nonAdminMembers.stream()
-                .filter(member -> !memberIds.contains(member.getUserId()))
+                .filter(member -> !memberEmails.contains(member.getEmail()))
                 .toList();
 
         householdFound.getMembers().removeIf(removedMembers::contains);
 
-        List<Member> newMembers = memberIds.stream()
-                .filter(id -> householdFound.getMembers().stream().noneMatch(currentMember -> currentMember.getUserId().equals(id)))
-                .map(id -> Member.builder()
-                        .userId(id)
+        List<Member> newMembers = memberEmails.stream()
+                .filter(email -> householdFound.getMembers().stream().noneMatch(currentMember -> currentMember.getEmail().equals(email)))
+                .map(email -> Member.builder()
+                        .email(email)
                         .role(member)
                         .invitationAccepted(false)
                         .build())
@@ -111,18 +111,18 @@ public class HouseholdService {
         return new ResponseEntity<>(householdResponse, OK);
     }
 
-    public ResponseEntity<HouseholdResponse> deleteMemberByHouseHold(String householdId, String userId, String memberId) {
+    public ResponseEntity<HouseholdResponse> deleteMemberByHouseHold(String householdId, String adminMemberEmail, String memberEmail) {
         Household householdFound = householdRepository.findById(householdId)
                 .orElseThrow(() -> new ResourceNotFoundException("No household found."));
 
         householdFound.getMembers().stream()
-                .filter(member -> member.getUserId().equals(memberId))
+                .filter(member -> member.getEmail().equals(memberEmail))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("No such member found."));
 
-        boolean isMemberAdmin = isMemberAdmin(userId, householdFound);
+        boolean isMemberAdmin = isMemberAdmin(adminMemberEmail, householdFound);
 
-        boolean isSelfRemoval = userId.equals(memberId);
+        boolean isSelfRemoval = adminMemberEmail.equals(memberEmail);
 
         if (!isMemberAdmin && !isSelfRemoval) {
             throw new ForbiddenUserException("You do not have permissions to access this resource.");
@@ -130,7 +130,7 @@ public class HouseholdService {
 
         log.info("Delete household member");
         householdFound.getMembers()
-                .removeIf(member -> member.getUserId().equals(memberId));
+                .removeIf(member -> member.getEmail().equals(memberEmail));
 
         householdRepository.save(householdFound);
 
@@ -161,32 +161,32 @@ public class HouseholdService {
         return new ResponseEntity<>("Deleted household",OK);
     }
 
-    private static boolean isMemberAdmin(String userId, Household householdFound) {
+    private static boolean isMemberAdmin(String adminMemberEmail, Household householdFound) {
         return householdFound.getMembers().stream()
-                .anyMatch(member -> member.getUserId().equals(userId) &&
+                .anyMatch(member -> member.getEmail().equals(adminMemberEmail) &&
                         member.getRole().equals(admin));
     }
 
     private List<HouseholdResponse> getMembersDataFromHouseholds(List<HouseholdResponse> householdResponses) {
 
-        Set<String> membersIds = householdResponses.stream()
+        Set<String> membersEmails = householdResponses.stream()
                 .flatMap(households -> households.getMembers().stream())
-                .map(MemberResponse::getUserId)
+                .map(MemberResponse::getEmail)
                 .collect(Collectors.toSet());
 
-        log.info("Fetch from user-service members info by Ids {}", membersIds);
+        log.info("Fetch from user-service members info by emails {}", membersEmails);
         //get Members info from user-service:
-        List<UserResponse> users = userClient.getUsers(membersIds).getBody();
+        List<UserResponse> users = userClient.getUsers(membersEmails).getBody();
 
         if(users != null && !users.isEmpty()) {
             Map<String, UserResponse> userResponseMap = users.stream()
-                    .collect(Collectors.toMap(UserResponse::id, Function.identity()));
+                    .collect(Collectors.toMap(UserResponse::email, Function.identity()));
 
             for( HouseholdResponse householdResponse : householdResponses) {
 
                 List<MemberResponse> memberResponses = householdResponse.getMembers().stream()
                         .map(member -> {
-                            UserResponse userResponse = userResponseMap.get(member.getUserId());
+                            UserResponse userResponse = userResponseMap.get(member.getEmail());
                             return HouseholdMapper.mapUsersToMemberResponse(member, userResponse);
                         })
                         .toList();
@@ -199,21 +199,21 @@ public class HouseholdService {
 
     private HouseholdResponse getMembersDataFromHousehold(HouseholdResponse householdResponse) {
 
-        Set<String> membersIds = householdResponse.getMembers().stream()
-                .map(MemberResponse::getUserId)
+        Set<String> membersEmails = householdResponse.getMembers().stream()
+                .map(MemberResponse::getEmail)
                 .collect(Collectors.toSet());
 
-        log.info("Fetch from user-service members info by Ids {}", membersIds);
+        log.info("Fetch from user-service members info by emails {}", membersEmails);
         //get Members info from user-service:
-        List<UserResponse> users = userClient.getUsers(membersIds).getBody();
+        List<UserResponse> users = userClient.getUsers(membersEmails).getBody();
 
         if(users != null && !users.isEmpty()) {
             Map<String, UserResponse> userResponseMap = users.stream()
-                    .collect(Collectors.toMap(UserResponse::id, Function.identity()));
+                    .collect(Collectors.toMap(UserResponse::email, Function.identity()));
 
                 List<MemberResponse> memberResponses = householdResponse.getMembers().stream()
                         .map(member -> {
-                            UserResponse userResponse = userResponseMap.get(member.getUserId());
+                            UserResponse userResponse = userResponseMap.get(member.getEmail());
                             return HouseholdMapper.mapUsersToMemberResponse(member, userResponse);
                         })
                         .toList();

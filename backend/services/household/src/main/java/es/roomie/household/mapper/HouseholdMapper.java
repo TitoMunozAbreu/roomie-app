@@ -38,6 +38,7 @@ public interface HouseholdMapper {
             household.setMembers(members);
             members.add(Member.builder()
                     .userId(userID)
+                    .email(householdRequest.email())
                     .role(Role.admin)
                     .invitationAccepted(true)
                     .build());

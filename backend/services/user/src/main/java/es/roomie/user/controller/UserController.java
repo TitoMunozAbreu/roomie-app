@@ -31,8 +31,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers(@RequestParam(required = true) Set<String> userIds) {
-        return userService.getAllUsers(userIds);
+    public ResponseEntity<List<UserResponse>> getAllUsers(@RequestParam(required = true) Set<String> userEmails) {
+        return userService.getAllUsers(userEmails);
     }
 
     @GetMapping("/{userId}")
@@ -42,7 +42,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<Void> registerNewUser(@RequestBody UserRequest userRequest) {
-        userService.registerNewUser(userRequest.userId());
+        userService.registerNewUser(userRequest);
         return ResponseEntity.ok().build();
     }
 

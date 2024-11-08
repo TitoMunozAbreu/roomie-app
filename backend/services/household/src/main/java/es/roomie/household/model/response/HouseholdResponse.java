@@ -1,5 +1,6 @@
 package es.roomie.household.model.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import es.roomie.household.model.response.feign.Task;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
