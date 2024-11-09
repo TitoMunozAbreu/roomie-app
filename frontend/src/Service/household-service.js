@@ -1,11 +1,11 @@
 import instance from "../Api/instance.js";
 import { ENDPOINTS } from "./endpoints.js";
 
-const createHousehold = async (userId, householdName) => {
+const createHousehold = async (householdName, userId, email) => {
   const userToken = localStorage.getItem("token");
   return await instance.post(
     `${ENDPOINTS.HOUSEHOLD.URL}${ENDPOINTS.HOUSEHOLD.URI}`,
-    { householdName: householdName, userId: userId },
+    { householdName: householdName, userId: userId, email: email },
     { headers: { Authorization: `Bearer ${userToken}` } }
   );
 };
@@ -40,9 +40,22 @@ const deleteHouseholdMember = async (householdId, memberEmail) => {
   );
 };
 
+const updateHouseholdMembers = async (householdId, memberEmails) => {
+  const userToken = localStorage.getItem("token");
+  return await instance.put(
+    `${ENDPOINTS.HOUSEHOLD.URL}${ENDPOINTS.HOUSEHOLD.URI}/${householdId}/members`,
+    {},
+    {
+      headers: { Authorization: `Bearer ${userToken}` },
+      params: { memberEmails: memberEmails },
+    }
+  );
+};
+
 export const householdService = {
   createHousehold,
   getHouseholds,
   updateHouseholdName,
-  deleteHouseholdMember
+  deleteHouseholdMember,
+  updateHouseholdMembers,
 };

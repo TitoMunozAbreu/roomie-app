@@ -31,6 +31,13 @@ const householdSlice = createSlice({
         }
       }
     },
+    addNewHousehold(state, action) {
+      if (state.households) {
+        state.households.push(action.payload);
+      } else {
+        state.households = [action.payload];
+      }
+    },
   },
 });
 
