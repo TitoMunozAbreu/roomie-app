@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: household-service
+  config:
+    import: optional:configserver:http://localhost:8888
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/${keycloak.realm}
+#Auth service
+keycloak:
+  realm: roomie_app
+
+#Feign client
+user:
+  url: ${USER_URL:http://localhost:8085/api/v1/users}

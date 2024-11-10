@@ -1,0 +1,12 @@
+spring:
+  data:
+    mongodb:
+      username: roomie
+      password: roomie
+      host: localhost
+      port: 27017
+      database: household
+      authentication-database: admin
+
+server:
+  port: 8095

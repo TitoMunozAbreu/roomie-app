@@ -4,12 +4,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "../../../store/reducers/user-slice";
 import { Layout, Menu } from "antd";
 import { useKeycloak } from "@react-keycloak/web";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   UserOutlined,
   LogoutOutlined,
   ProfileOutlined,
+  DashboardOutlined,
+  MessageOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 
 const { Header } = Layout;
@@ -17,6 +20,7 @@ const { Header } = Layout;
 export default function AppHeader() {
   const { keycloak, initialized } = useKeycloak();
   const user = useSelector((state) => state.user.user);
+  const currentUri = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -53,10 +57,17 @@ export default function AppHeader() {
     {
       key: "dashboard",
       label: "Dashboard",
+      icon: <DashboardOutlined />,
+    },
+    {
+      key: "groups",
+      label: "Groups",
+      icon: <SettingOutlined />,
     },
     {
       key: "notifications",
       label: "Notifications",
+      icon: <MessageOutlined />,
     },
     {
       key: "user",
@@ -67,7 +78,7 @@ export default function AppHeader() {
       ),
       icon: <UserOutlined />,
       children: [
-        { key: "profile", label: "profile", icon: <ProfileOutlined /> },
+        { key: "profile", label: "Profile", icon: <ProfileOutlined /> },
         { key: "logout", label: "Logout", icon: <LogoutOutlined /> },
       ],
     },
@@ -84,6 +95,9 @@ export default function AppHeader() {
         break;
       case "dashboard":
         navigate("/dashboard");
+        break;
+      case "groups":
+        navigate("/groups");
         break;
       case "notifications":
         navigate("/notifications");
@@ -113,11 +127,12 @@ export default function AppHeader() {
         theme="dark"
         mode="horizontal"
         onClick={handleMenuClick}
-        defaultSelectedKeys={["1"]}
+        defaultSelectedKeys={currentUri.pathname.slice(1)}
         items={keycloak.authenticated ? MENU_AUTH : MENU}
         style={{
           flex: 1,
           minWidth: 0,
+          justifyContent: "end",
         }}
       />
     </Header>

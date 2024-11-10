@@ -54,7 +54,7 @@ public class UserRegistrationProvider implements EventListenerProvider {
             connection.setDoOutput(true);  // Permitir enviar datos
 
             // Crear el cuerpo de la solicitud (JSON con los detalles del usuario)
-            String jsonInputString = "{ \"userId\": \"" + event.getUserId() + "\" }";
+            String jsonInputString = "{ \"userId\": \"" + event.getUserId() + "\", \"email\": \"" + event.getDetails().get("email") + "\"}";
 
             // Enviar datos en la solicitud
             try (OutputStream os = connection.getOutputStream()) {
@@ -65,7 +65,7 @@ public class UserRegistrationProvider implements EventListenerProvider {
             // Obtener la respuesta
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                logger.info("Usuario enviado al backend correctamente");
+                logger.info("Solicitud de registrar usuario: {}", jsonInputString);
             } else {
                 logger.error("Error al enviar usuario al backend: " + responseCode);
             }

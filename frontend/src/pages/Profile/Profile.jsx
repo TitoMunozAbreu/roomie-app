@@ -1,5 +1,5 @@
 import "./Profile.css";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Descriptions,
@@ -108,7 +108,7 @@ export default function Profile() {
           ></Button>
         }
       >
-        {user.taskPreferences ? (
+        {user.taskPreferences && user.taskPreferences.length > 0 ? (
           user.taskPreferences.map((preference, index) => (
             <Descriptions.Item label={preference.taskName} key={index}>
               {preference.preference}
@@ -136,7 +136,7 @@ export default function Profile() {
           ></Button>
         }
       >
-        {user.availabilities ? (
+        {user.availabilities && user.availabilities.length > 0? (
           user.availabilities.map((availability, index) => (
             <Descriptions.Item label={availability.day} key={index}>
               {availability.hours[0]} - {availability.hours[1]}
@@ -155,7 +155,7 @@ export default function Profile() {
       <List
         itemLayout="horizontal"
         dataSource={
-          user.taskHistories
+          user.taskHistories && user.taskHistories.length > 0
             ? user.taskHistories
             : [{ title: "No task registered", description: "" }]
         }

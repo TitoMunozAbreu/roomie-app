@@ -8,6 +8,7 @@ import es.roomie.user.mapper.UserMapper;
 import es.roomie.user.model.User;
 import es.roomie.user.model.request.AvailabilityRequest;
 import es.roomie.user.model.request.TaskPreferenceRequest;
+import es.roomie.user.model.request.UserRequest;
 import es.roomie.user.model.response.AvailabilityResponse;
 import es.roomie.user.model.response.TaskHistoryResponse;
 import es.roomie.user.model.response.TaskPreferenceResponse;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
@@ -49,6 +51,29 @@ public class UserService {
         this.taskPreferenceMapper = taskPreferenceMapper;
         this.availabilityMapper = availabilityMapper;
         this.taskHistoryMapper = taskHistoryMapper;
+    }
+
+    public ResponseEntity<List<UserResponse>> getAllUsers(Set<String> userEmails) {
+        log.info("Get all users by emails {}", userEmails);
+        List<User> usersFound = userRepository.findUserIdsByEmails(userEmails);
+
+        if (usersFound.isEmpty()) {throw new ResourceNotFoundException("Users not found");}
+
+        List<String> userIds = usersFound.stream()
+                .map(User::getId)
+                .toList();
+
+        List<UserResponse> users = userIds.stream()
+                .map(keycloakService::getUserById)
+                .map(userRepresentation -> UserResponse.builder()
+                        .id(userRepresentation.getId())
+                        .firstName(userRepresentation.getFirstName())
+                        .lastName(userRepresentation.getLastName())
+                        .email(userRepresentation.getEmail())
+                        .build())
+                .toList();
+
+        return new ResponseEntity<>(users, OK);
     }
 
     public ResponseEntity<UserResponse> getUserById(String userId) {
@@ -96,12 +121,15 @@ public class UserService {
         return new ResponseEntity<>(taskHistoryMapper.mapTaskHistoryResponse(userFound.getTaskHistories()), ACCEPTED);
     }
 
-    public void registerNewUser(String userId) {
-        log.info("Check if exists userId {}", userId);
-        Optional<User> userFound = userRepository.findById(userId);
+    public void registerNewUser(UserRequest userRequest) {
+        log.info("Check if exists userId {}", userRequest.userId());
+        Optional<User> userFound = userRepository.findById(userRequest.userId());
         if(userFound.isEmpty()){
-            log.info("Register new user {}", userId);
-            User newUser = User.builder().id(userId).build();
+            log.info("Register new user {}", userRequest.userId());
+            User newUser = User.builder()
+                    .id(userRequest.userId())
+                    .email(userRequest.email())
+                    .build();
             userRepository.save(newUser);
         }
     }

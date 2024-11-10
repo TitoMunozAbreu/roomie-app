@@ -11,7 +11,7 @@ const Notification = () => {
   useEffect(() => {
     const hideNotification = messageApi.open({
       style: {
-        marginTop: "7vh",
+        marginTop: "8vh",
       },
       type: notificationState.type,
       content: notificationState.message,

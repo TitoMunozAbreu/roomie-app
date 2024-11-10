@@ -1,31 +1,31 @@
-.home-page {
+.homePage {
     padding: 50px;
   }
   
-  .intro-section {
+  .introSection {
     margin-bottom: 50px;
     padding-bottom: 5%;
   }
   
-  .intro-image {
+  .introImage {
     width: 100%;
     height: auto;
 
   }
   
-  .features-section {
+  .featuresSection {
     text-align: center;
   }
   
-  .features-section h2 {
+  .featuresSection h2 {
     margin-bottom: 30px;
   }
   
-  .ant-card {
+  .antCard {
     text-align: center;
   }
 
-  :where(.css-dev-only-do-not-override-5wsri9).ant-card .ant-card-cover  {
+  .customCard .featureImage {
     width: 50%;
     display: -webkit-inline-box;
     padding-top: 2%;
