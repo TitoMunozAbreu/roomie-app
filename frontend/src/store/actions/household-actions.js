@@ -83,6 +83,23 @@ export const updateHouseholdMembers = (householdId, memberEmails) => {
   };
 };
 
+export const deleteHousehold = (householdId) => {
+  return async (dispatch) => {
+    const deleteHouseholdById = async () => {
+      return await householdService.deleteHousehold(householdId);
+    };
+
+    deleteHouseholdById()
+      .then(function (response) {
+        dispatch(householdActions.deleteHouseholdById(householdId));
+        handleNotification(response.data, dispatch);
+      })
+      .catch(function (error) {
+        handleErrorResponse(error, dispatch);
+      });
+  };
+};
+
 const handleErrorResponse = (error, dispatch) => {
   dispatch(
     uiActions.showNotification({

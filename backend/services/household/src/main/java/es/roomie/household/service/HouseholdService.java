@@ -12,11 +12,13 @@ import es.roomie.household.model.response.MemberResponse;
 import es.roomie.household.model.resquest.HouseholdRequest;
 import es.roomie.household.repository.HouseholdRepository;
 import es.roomie.household.service.client.feign.UserClient;
+import feign.RetryableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,12 +53,16 @@ public class HouseholdService {
         //TODO: send message to notification-service "new home created"
         log.info("Sent notification to user...");
 
-        return new ResponseEntity<>(householdMapper.mapToHouseHoldResponse(newHousehold), CREATED);
+        HouseholdResponse householdResponse = householdMapper.mapToHouseHoldResponse(newHousehold);
+
+        getMembersDataFromHousehold(householdResponse);
+
+        return new ResponseEntity<>(householdResponse, CREATED);
     }
 
-    public ResponseEntity<List<HouseholdResponse>> getHouseholds(String userId) {
+    public ResponseEntity<List<HouseholdResponse>> getHouseholds(String memberEmail) {
         log.info("Fetch households");
-        List<Household> houseHoldsByMemberUserId = householdRepository.findByMembersUserId(userId);
+        List<Household> houseHoldsByMemberUserId = householdRepository.findByMembersEmail(memberEmail);
 
         if (houseHoldsByMemberUserId.isEmpty()) {
             throw new ResourceNotFoundException("No households found.");
@@ -104,8 +110,8 @@ public class HouseholdService {
 
         getMembersDataFromHousehold(householdResponse);
 
-        //TODO: send message to notification-service "UserResponse added to a household"
-        //TODO: send message to notification-service "UserResponse deleted from household"
+        //TODO: send message to notification-service "Accept Invitation to a household"
+        //TODO: send message to notification-service "deleted from household"
         log.info("Sent notification to users...");
 
         return new ResponseEntity<>(householdResponse, OK);
@@ -174,9 +180,14 @@ public class HouseholdService {
                 .map(MemberResponse::getEmail)
                 .collect(Collectors.toSet());
 
-        log.info("Fetch from user-service members info by emails {}", membersEmails);
-        //get Members info from user-service:
-        List<UserResponse> users = userClient.getUsers(membersEmails).getBody();
+        List<UserResponse> users = new ArrayList<>();
+
+        try {
+            log.info("Fetch from user-service members info by emails {}", membersEmails);
+            users = userClient.getUsers(membersEmails).getBody();
+        } catch (RetryableException e) {
+            log.error(e.getMessage());
+        }
 
         if(users != null && !users.isEmpty()) {
             Map<String, UserResponse> userResponseMap = users.stream()
@@ -203,9 +214,14 @@ public class HouseholdService {
                 .map(MemberResponse::getEmail)
                 .collect(Collectors.toSet());
 
-        log.info("Fetch from user-service members info by emails {}", membersEmails);
-        //get Members info from user-service:
-        List<UserResponse> users = userClient.getUsers(membersEmails).getBody();
+        List<UserResponse> users = new ArrayList<>();
+
+        try {
+            log.info("Fetch from user-service members info by emails {}", membersEmails);
+            users = userClient.getUsers(membersEmails).getBody();
+        } catch (RetryableException e) {
+            log.error(e.getMessage());
+        }
 
         if(users != null && !users.isEmpty()) {
             Map<String, UserResponse> userResponseMap = users.stream()

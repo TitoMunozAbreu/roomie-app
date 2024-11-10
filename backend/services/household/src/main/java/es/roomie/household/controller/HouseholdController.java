@@ -27,15 +27,18 @@ public class HouseholdController {
     }
 
     @PostMapping
-    public ResponseEntity<HouseholdResponse> createHousehold(@Valid @RequestBody HouseholdRequest homeRequest) {
+    public ResponseEntity<HouseholdResponse> createHousehold(@AuthenticationPrincipal Jwt principal,
+                                                             @Valid @RequestBody HouseholdRequest homeRequest) {
+        String memberEmail = principal.getClaim("email");
+        tokenService.setToken(principal.getTokenValue());
         return householdService.createHousehold(homeRequest);
     }
 
     @GetMapping
     public ResponseEntity<List<HouseholdResponse>> getHouseholds(@AuthenticationPrincipal Jwt principal) {
-        String userId = principal.getSubject();
+        String memberEmail = principal.getClaim("email");
         tokenService.setToken(principal.getTokenValue());
-        return householdService.getHouseholds(userId);
+        return householdService.getHouseholds(memberEmail);
     }
 
     @PutMapping("/{householdId}/members")

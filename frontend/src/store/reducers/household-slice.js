@@ -38,6 +38,15 @@ const householdSlice = createSlice({
         state.households = [action.payload];
       }
     },
+    deleteHouseholdById(state, action) {
+      const index = state.households.findIndex((h) => h.id === action.payload);
+      if (index !== -1) {
+        state.households.splice(index, 1);
+      }
+      if (state.households.length === 0) {
+        state.households = [];
+      }
+    },
   },
 });
 

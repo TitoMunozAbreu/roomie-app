@@ -36,6 +36,7 @@ import styles from "./Groups.module.css";
 import { uiActions } from "../../store/reducers/ui-slice";
 import {
   createHousehold,
+  deleteHousehold,
   deleteHouseholdMember,
   updateHouseholdMembers,
   updateHouseholdName,
@@ -52,6 +53,7 @@ const Groups = () => {
   const errorMessage = useSelector((state) => state.ui.errorMessage);
 
   const [editHouseholdId, setEditHouseholdId] = useState(null);
+  const [editHouseholdName, setEditHouseholdName] = useState(null);
   const [newHouseholdName, setNewHouseholdName] = useState(null);
   const [newMemberEmail, setNewMemberEmail] = useState(null);
   const [selectedHouseholdId, setSelectedHouseholdId] = useState(null);
@@ -71,7 +73,7 @@ const Groups = () => {
       .catch(function (error) {
         dispatch(uiActions.updateErrorMessage(error.response.data));
       });
-  }, [dispatch]);
+  }, [errorMessage, dispatch]);
 
   const hanldeCreateHousehold = () => {
     dispatch(createHousehold(newHouseholdName, user.id, user.email));
@@ -89,11 +91,11 @@ const Groups = () => {
 
   const handleEditHouseholdName = (userId, householdName) => {
     setEditHouseholdId(userId);
-    setNewHouseholdName(householdName);
+    setEditHouseholdName(householdName);
   };
 
   const hanldeUpdateHouseholdName = () => {
-    dispatch(updateHouseholdName(editHouseholdId, newHouseholdName));
+    dispatch(updateHouseholdName(editHouseholdId, editHouseholdName));
     handleCancelEditHouseholdName();
   };
 
@@ -133,10 +135,7 @@ const Groups = () => {
       okType: "danger",
       cancelText: "Cancel",
       onOk() {
-        console.log("OK");
-      },
-      onCancel() {
-        console.log("Cancel");
+        dispatch(deleteHousehold(householdId));
       },
     });
   };
@@ -168,8 +167,13 @@ const Groups = () => {
             <div style={{ margin: "10px 0" }} id="newHouseholdInpunt">
               <Row gutter={16}>
                 <Col xs={24} md={12}>
+                  <span>Create Household</span>
+                </Col>
+              </Row>
+              <Row gutter={8}>
+                <Col xs={24} md={12}>
                   <Input
-                    placeholder="Enter new household name"
+                    placeholder="Enter name"
                     value={newHouseholdName}
                     onChange={(e) => setNewHouseholdName(e.target.value)}
                     onPressEnter={hanldeCreateHousehold}
@@ -181,13 +185,14 @@ const Groups = () => {
                   <Button
                     style={{ width: "40px" }}
                     variant="outlined"
+                    danger
                     icon={<CloseOutlined />}
                     onClick={hanldeCancelCreateHousehold}
                   ></Button>
                   {/* Btn create new household */}
                   <Button
                     style={{ marginLeft: "2%", width: "40px" }}
-                    type="primary"
+                    variant="outlined"
                     icon={<CheckOutlined />}
                     onClick={hanldeCreateHousehold}
                   ></Button>
@@ -195,7 +200,7 @@ const Groups = () => {
               </Row>
             </div>
           )}
-          {errorMessage && <span>{errorMessage}</span>}
+          {errorMessage && !selectedBtnCreateHousehold ? <span>{errorMessage}</span>:<></>}
 
           {/* Household groups */}
           {households &&
@@ -207,8 +212,8 @@ const Groups = () => {
                   // Display houseName or input
                   editHouseholdId == item.id ? (
                     <Input
-                      value={newHouseholdName}
-                      onChange={(e) => setNewHouseholdName(e.target.value)}
+                      value={editHouseholdName}
+                      onChange={(e) => setEditHouseholdName(e.target.value)}
                       onPressEnter={hanldeUpdateHouseholdName}
                       placeholder="Filled"
                       variant="filled"
@@ -260,27 +265,18 @@ const Groups = () => {
                                 )
                               }
                             >
-                              <Button
-                                variant="outlined"
-                                icon={<EditOutlined />}
-                                type="primary"
-                                ghost
-                              >
-                                Household name
-                              </Button>
+                              <Space style={{ color: "#1677ff" }}>
+                                <EditOutlined /> Household name
+                              </Space>
                             </Menu.Item>
                             {/* Delete household */}
                             <Menu.Item
                               key="delete"
                               onClick={() => showDeleteConfirm(item.id)}
                             >
-                              <Button
-                                variant="outlined"
-                                icon={<DeleteOutlined />}
-                                danger
-                              >
-                                Delete household
-                              </Button>
+                              <Space style={{ color: "#ff4d4f" }}>
+                                <DeleteOutlined /> Delete household
+                              </Space>
                             </Menu.Item>
                           </Menu>
                         }
@@ -368,7 +364,7 @@ const Groups = () => {
                         }
                         description={member.email}
                       />
-                      {user.id !== member.userId && (
+                      {user.email !== member.email && (
                         <div>
                           {/* Delete member */}
                           <Button

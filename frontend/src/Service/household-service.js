@@ -34,9 +34,7 @@ const deleteHouseholdMember = async (householdId, memberEmail) => {
   const userToken = localStorage.getItem("token");
   return await instance.delete(
     `${ENDPOINTS.HOUSEHOLD.URL}${ENDPOINTS.HOUSEHOLD.URI}/${householdId}/members/${memberEmail}`,
-    {
-      headers: { Authorization: `Bearer ${userToken}` },
-    }
+    { headers: { Authorization: `Bearer ${userToken}` } }
   );
 };
 
@@ -52,10 +50,19 @@ const updateHouseholdMembers = async (householdId, memberEmails) => {
   );
 };
 
+const deleteHousehold = async (householdId) => {
+  const userToken = localStorage.getItem("token");
+  return await instance.delete(
+    `${ENDPOINTS.HOUSEHOLD.URL}${ENDPOINTS.HOUSEHOLD.URI}/${householdId}`,
+    { headers: { Authorization: `Bearer ${userToken}` } }
+  );
+};
+
 export const householdService = {
   createHousehold,
   getHouseholds,
   updateHouseholdName,
   deleteHouseholdMember,
   updateHouseholdMembers,
+  deleteHousehold,
 };
