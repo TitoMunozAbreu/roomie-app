@@ -4,10 +4,7 @@ import es.roomie.task.model.request.TaskResquest;
 import es.roomie.task.model.response.TaskResponse;
 import es.roomie.task.service.TaskService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/tasks")
@@ -22,6 +19,12 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<TaskResponse> createTask(@RequestBody TaskResquest taskResquest) {
         return taskService.createTask(taskResquest);
+    }
+
+    @PutMapping("{taskId}")
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable String taskId,
+                                                   @RequestBody TaskResquest taskResquest) {
+        return taskService.updateTask(taskId, taskResquest);
     }
 
 }
