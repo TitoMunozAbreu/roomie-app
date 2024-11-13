@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class TaskResponse {
     private String id;
     private String householdId;
+    private String createdBy;
     private String title;
     private String description;
     private Category category;

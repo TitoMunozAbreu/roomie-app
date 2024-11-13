@@ -6,6 +6,7 @@ import es.roomie.task.config.enums.Status;
 import java.time.LocalDateTime;
 
 public record TaskResquest(String householdId,
+                           String createdBy,
                            String title,
                            String description,
                            Category category,

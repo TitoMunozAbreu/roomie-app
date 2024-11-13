@@ -61,7 +61,7 @@ public interface TaskMapper {
         task.setId(UUID.randomUUID().toString());
 
         //set creation date
-        task.setCreationDate(LocalDateTime.now());
+        task.setCreatedAt(LocalDateTime.now());
 
         //set statistics
         task.setStatistics(Statistics.builder()

@@ -12,6 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
+import static es.roomie.task.config.enums.Status.Completed;
+import static java.util.Map.of;
 import static org.springframework.http.HttpStatus.OK;
 
 @Service
@@ -42,7 +46,7 @@ public class TaskService {
 
         taskMapper.updateTaskFromRequest(taskResquest, taskFound);
 
-        if(taskFound.getStatus() == Status.Completed) {
+        if (taskFound.getStatus() == Completed) {
             incrementCompletedTask(taskFound);
         }
 
@@ -50,6 +54,26 @@ public class TaskService {
         taskRepository.save(taskFound);
 
         return new ResponseEntity<>(taskMapper.mapToTaskResponse(taskFound), OK);
+    }
+
+    public ResponseEntity<?> updateStatus(String taskId, Status status) {
+        Task taskFound = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("No task found."));
+
+        boolean isCompletedStatus = status.equals(Completed) && taskFound.getStatus() != Completed;
+
+        if (taskFound.getStatus() != status) {
+            taskFound.setStatus(status);
+
+            if (isCompletedStatus) {
+                incrementCompletedTask(taskFound);
+            }
+
+            log.info("Update status");
+            taskRepository.save(taskFound);
+        }
+
+        return new ResponseEntity<>(of("status", taskFound.getStatus()), OK);
     }
 
     private Task incrementTotalTask(Task task) {

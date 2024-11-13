@@ -19,12 +19,13 @@ import java.time.LocalDateTime;
 public class Task {
     @Id private String id;
     private String householdId;
+    private String createdBy;
     private String title;
     private String description;
     private Category category;
     private int estimatedDuration;
     private String assignedTo;
-    private LocalDateTime creationDate;
+    private LocalDateTime createdAt;
     private LocalDateTime dueDate;
     private Status status;
     private Statistics statistics;
