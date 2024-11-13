@@ -2,6 +2,23 @@ import { householdService } from "../../Service/household-service";
 import { uiActions } from "../reducers/ui-slice";
 import { householdActions } from "../reducers/household-slice";
 
+export const getHouseholds = () => {
+  return async (dispatch) => {
+    const fetchHouseholds = async () => {
+      return await householdService.getHouseholds();
+    }
+
+    fetchHouseholds()
+      .then(function (response) {
+        dispatch(householdActions.setHouseholds(response.data));
+        dispatch(uiActions.updateErrorMessage(null));
+      })
+      .catch(function (error) {
+        dispatch(uiActions.updateErrorMessage(error.response.data));
+      });
+  }
+}
+
 export const createHousehold = (householdName, userId, email) => {
   return async (dispatch) => {
     const addNewHousehold = async () => {

@@ -38,6 +38,7 @@ import {
   createHousehold,
   deleteHousehold,
   deleteHouseholdMember,
+  getHouseholds,
   updateHouseholdMembers,
   updateHouseholdName,
 } from "../../store/actions/household-actions";
@@ -61,18 +62,7 @@ const Groups = () => {
     useState(false);
 
   useEffect(() => {
-    async function fetchHouseholds() {
-      return await householdService.getHouseholds();
-    }
-
-    fetchHouseholds()
-      .then(function (response) {
-        dispatch(householdActions.setHouseholds(response.data));
-        dispatch(uiActions.updateErrorMessage(null));
-      })
-      .catch(function (error) {
-        dispatch(uiActions.updateErrorMessage(error.response.data));
-      });
+    dispatch(getHouseholds());
   }, [errorMessage, dispatch]);
 
   const hanldeCreateHousehold = () => {
@@ -200,7 +190,11 @@ const Groups = () => {
               </Row>
             </div>
           )}
-          {errorMessage && !selectedBtnCreateHousehold ? <span>{errorMessage}</span>:<></>}
+          {errorMessage && !selectedBtnCreateHousehold ? (
+            <span>{errorMessage}</span>
+          ) : (
+            <></>
+          )}
 
           {/* Household groups */}
           {households &&

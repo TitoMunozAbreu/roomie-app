@@ -1,7 +1,7 @@
 // Dashboard.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  Layout,
   Menu,
   Card,
   List,
@@ -19,111 +19,139 @@ import {
   ExclamationCircleOutlined,
   EditOutlined,
   PlusOutlined,
+  CloseCircleOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
+import { getHouseholds } from "../../store/actions/household-actions";
+import { householdActions } from "../../store/reducers/household-slice";
 
-const { Header, Content, Sider } = Layout;
 const { TabPane } = Tabs;
 
-const households = [
-  {
-    id: "household1",
-    name: "Casa de la Playa",
-    tasks: [
-      { id: "task1", name: "Limpiar la nevera", state: "Pendiente" },
-      { id: "task2", name: "Lavar los platos", state: "Completada" },
-      { id: "task3", name: "Regar las plantas", state: "En Progreso" },
-    ],
-  },
-  {
-    id: "household2",
-    name: "Apartamento Centro",
-    tasks: [
-      { id: "task4", name: "Aspirar la sala", state: "Pendiente" },
-      { id: "task5", name: "Limpiar el baño", state: "Completada" },
-    ],
-  },
+const taskStates = [
+  "All",
+  "Pending",
+  "Progress",
+  "Overdue",
+  "Completed",
+  "Cancelled",
 ];
 
-const taskStates = ["Todas", "Pendiente", "En Progreso", "Completada"];
-
 const Dashboard = () => {
-  const [selectedHousehold, setSelectedHousehold] = useState(households[0].id);
-  const [selectedFilter, setSelectedFilter] = useState("Todas");
+  const dispatch = useDispatch();
+  const households = useSelector((state) => state.households.households);
+  const selectedHousehold = useSelector((state) => state.households.selectedHousehold);
+  const errorMessage = useSelector((state) => state.ui.errorMessage);
 
-  const filteredTasks = households
-    .find((household) => household.id === selectedHousehold)
-    .tasks.filter(
-      (task) => selectedFilter === "Todas" || task.state === selectedFilter
-    );
+  const [selectedFilter, setSelectedFilter] = useState("All");
+
+  useEffect(() => {
+    if (households === null || households.length === 0) {
+      dispatch(getHouseholds()); 
+    }
+
+  }, [errorMessage, dispatch]);
+
+  // const filteredTasks = households
+  //   .find((household) => household.id === selectedHousehold)
+  //   .tasks.filter(
+  //     (task) => selectedFilter === "All" || task.status === selectedFilter
+  //   );
 
   const renderTaskStateBadge = (state) => {
     switch (state) {
-      case "Pendiente":
+      case "Pending":
         return (
           <Tag icon={<ExclamationCircleOutlined />} color="orange">
-            Pendiente
+            Pending
           </Tag>
         );
-      case "En Progreso":
+      case "Progress":
         return (
           <Tag icon={<ClockCircleOutlined />} color="blue">
-            En Progreso
+            In Progress
           </Tag>
         );
-      case "Completada":
+      case "Overdue":
+        return (
+          <Tag icon={<CloseCircleOutlined />} color="red">
+            Overdue
+          </Tag>
+        );
+      case "Completed":
         return (
           <Tag icon={<CheckCircleOutlined />} color="green">
-            Completada
+            Completed
           </Tag>
         );
+      case "Cancelled":
+        return (
+          <Tag icon={<StopOutlined />} color="gray">
+            Cancelled
+          </Tag>
+        );
+      case "All":
+        return <Tag color="default">All</Tag>;
       default:
         return <Tag color="default">{state}</Tag>;
     }
   };
 
+  const updateSelectedHousehold = (householdId) => {
+    dispatch(householdActions.updateSelecteHousehold(householdId));
+    setSelectedFilter("All");
+  }
   return (
     <>
       <h2 style={{ textAlign: "start" }}>Households</h2>
 
-      <Row gutter={16}>
-        <Col span={6}>
-          <Menu
-            mode="inline"
-            defaultSelectedKeys={[households[0].id]}
-            style={{ height: "100%", borderRight: 0 }}
-            onSelect={({ key }) => setSelectedHousehold(key)}
-          >
-            {households.map((household) => (
-              <Menu.Item key={household.id}>{household.name}</Menu.Item>
-            ))}
-          </Menu>
-          <Button variant="outlined" icon={<EditOutlined />}></Button>
-        </Col>
-        <Col span={18}>
-          <Card title="Resumen de Tareas">
-            <Tabs
-              defaultActiveKey="Todas"
-              onChange={(key) => setSelectedFilter(key)}
+      {households && (
+        <Row gutter={16}>
+          <Col span={6}>
+            <Menu
+              mode="inline"
+              defaultSelectedKeys={[households[0].id]}
+              style={{ height: "100%", borderRight: 0 }}
+              onSelect={({ key }) => updateSelectedHousehold(key)}
             >
-              {taskStates.map((state) => (
-                <TabPane tab={state} key={state} />
+              {households.map((household) => (
+                <Menu.Item key={household.id}>
+                  {household.householdName}
+                </Menu.Item>
               ))}
-            </Tabs>
-            <List
-              itemLayout="horizontal"
-              dataSource={filteredTasks}
-              renderItem={(task) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={task.name}
-                    description={renderTaskStateBadge(task.state)}
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-      </Row>
+            </Menu>
+          </Col>
+          <Col span={18}>
+            <Card title="Task Summary">
+              <Tabs
+                defaultActiveKey="All"
+                onChange={(key) => setSelectedFilter(key)}
+              >
+                {taskStates.map((state) => (
+                  <TabPane tab={state} key={state} />
+                ))}
+              </Tabs>
+              <List
+                itemLayout="horizontal"
+                dataSource={
+                  households
+                    .find((household) => household.id === selectedHousehold)
+                    ?.tasks?.filter((task) =>
+                      selectedFilter === "All" || task.status === selectedFilter
+                    ) || []
+                }
+                renderItem={(task) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={task.title}
+                      description={renderTaskStateBadge(task.status)}
+                    />
+                  </List.Item>
+                )}
+              />
+            </Card>
+          </Col>
+        </Row>
+      )}
     </>
   );
 };

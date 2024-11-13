@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   households: null,
+  selectedHousehold: null
 };
 
 const householdSlice = createSlice({
@@ -10,6 +11,7 @@ const householdSlice = createSlice({
   reducers: {
     setHouseholds(state, action) {
       state.households = action.payload;
+      state.selectedHousehold = state.households[0].id;
     },
     updateHouseholdName(state, action) {
       if (state.households) {
@@ -47,6 +49,9 @@ const householdSlice = createSlice({
         state.households = [];
       }
     },
+    updateSelecteHousehold(state, action){
+      state.selectedHousehold = action.payload;
+    }
   },
 });
 
