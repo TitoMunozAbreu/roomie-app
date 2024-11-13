@@ -1,7 +1,5 @@
-package es.roomie.task.model.response;
+package es.roomie.household.model.feign;
 
-import es.roomie.task.config.enums.Category;
-import es.roomie.task.config.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
