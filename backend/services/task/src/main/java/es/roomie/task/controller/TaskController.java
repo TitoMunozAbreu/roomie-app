@@ -41,4 +41,9 @@ public class TaskController {
         return taskService.updateStatus(taskId, status);
     }
 
+    @DeleteMapping("{taskId}")
+    public ResponseEntity<?> deleteTask(@PathVariable String taskId) {
+        return taskService.deleteTask(taskId);
+    }
+
 }

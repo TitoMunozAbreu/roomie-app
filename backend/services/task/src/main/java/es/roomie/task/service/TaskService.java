@@ -85,6 +85,16 @@ public class TaskService {
         return new ResponseEntity<>(of("status", taskFound.getStatus()), OK);
     }
 
+    public ResponseEntity<?> deleteTask(String taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("No task found."));
+
+        log.info("Delete task");
+        taskRepository.delete(task);
+
+        return new ResponseEntity<>("Deleted task", OK);
+    }
+
     private Task incrementTotalTask(Task task) {
         task.getStatistics().incrementTotalTask();
         return task;
