@@ -7,6 +7,8 @@ import es.roomie.task.service.TaskService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/tasks")
 public class TaskController {
@@ -15,6 +17,11 @@ public class TaskController {
 
     public TaskController(TaskService taskService) {
         this.taskService = taskService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<TaskResponse>> getTasksByHouseholdIdIn(@RequestParam List<String> householdIds) {
+        return taskService.getTasksByHouseholdIdIn(householdIds);
     }
 
     @PostMapping

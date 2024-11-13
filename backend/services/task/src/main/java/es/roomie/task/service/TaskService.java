@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import java.util.List;
 
 import static es.roomie.task.config.enums.Status.Completed;
 import static java.util.Map.of;
@@ -28,6 +28,15 @@ public class TaskService {
     public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
+    }
+
+    public ResponseEntity<List<TaskResponse>> getTasksByHouseholdIdIn(List<String> householdIds) {
+        log.info("Fetch tasks");
+        List<Task> tasks = taskRepository.findByHouseholdIdIn(householdIds);
+
+        if(tasks.isEmpty()) {throw  new ResourceNotFoundException("No tasks found with ids: " + householdIds);}
+
+        return new ResponseEntity<>(taskMapper.mapToTasksResponse(tasks), OK);
     }
 
     public ResponseEntity<TaskResponse> createTask(TaskResquest taskResquest) {

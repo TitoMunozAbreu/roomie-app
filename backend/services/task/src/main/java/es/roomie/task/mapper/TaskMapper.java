@@ -4,20 +4,31 @@ import es.roomie.task.model.Statistics;
 import es.roomie.task.model.Task;
 import es.roomie.task.model.request.TaskResquest;
 import es.roomie.task.model.response.TaskResponse;
-import org.mapstruct.*;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mapstruct.NullValueMappingStrategy.RETURN_DEFAULT;
+import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
+
 @Mapper(componentModel = "spring",
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+        nullValuePropertyMappingStrategy = IGNORE)
 public interface TaskMapper {
 
     Task mapToTask(TaskResquest task);
 
     TaskResponse mapToTaskResponse(Task task);
+
+    @IterableMapping(nullValueMappingStrategy = RETURN_DEFAULT,
+                     elementTargetType = TaskMapper.class)
+    List<TaskResponse> mapToTasksResponse(List<Task> tasks);
 
     default Task updateTaskFromRequest(TaskResquest taskResquest, Task taskFound) {
         Optional.ofNullable(taskResquest.householdId())
