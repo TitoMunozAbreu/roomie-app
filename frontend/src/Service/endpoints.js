@@ -6,5 +6,9 @@ export const ENDPOINTS = {
   HOUSEHOLD: {
     URL: "http://localhost:8095",
     URI: "/api/v1/households"
+  },
+  TASK: {
+    URL: "http://localhost:8240",
+    URI: "/api/v1/tasks"
   }
 };

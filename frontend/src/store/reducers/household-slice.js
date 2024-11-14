@@ -2,7 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   households: null,
-  selectedHousehold: null
+  selectedHousehold: null,
+  selectedTask: null,
+  isTaskEdit: false
 };
 
 const householdSlice = createSlice({
@@ -11,7 +13,7 @@ const householdSlice = createSlice({
   reducers: {
     setHouseholds(state, action) {
       state.households = action.payload;
-      state.selectedHousehold = state.households[0].id;
+      state.selectedHousehold = state.households[0];
     },
     updateHouseholdName(state, action) {
       if (state.households) {
@@ -49,9 +51,36 @@ const householdSlice = createSlice({
         state.households = [];
       }
     },
-    updateSelecteHousehold(state, action){
+    updateSelecteHousehold(state, action) {
       state.selectedHousehold = action.payload;
-    }
+    },
+    setTask(state, action) {
+      state.selectedTask = action.payload;
+    },
+    setIsTaskEdit(state) {
+      state.isTaskEdit = !state.isTaskEdit;
+    },
+    addNewTaskToHouseHold(state, action) {
+      const household = state.households.find(
+        (h) => h.id === action.payload.householdId
+      );
+      household.tasks.push(action.payload);
+    },
+    updateTaskToHouseHold(state, action) {
+      const householdIndex = state.households.findIndex(
+        (h) => h.id === action.payload.householdId
+      );
+
+      if (householdIndex !== -1) {
+        const taskIndex = state.households[householdIndex].tasks.findIndex(
+          (t) => t.id === id
+        );
+      }
+
+      if (taskIndex !== -1) {
+        state.households[householdIndex].tasks[taskIndex] = updatedTask;
+      } 
+    },
   },
 });
 

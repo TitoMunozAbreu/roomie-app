@@ -3,6 +3,7 @@ import { Modal, Button } from "antd";
 import UserForm from "../Forms/user-form";
 import { useDispatch, useSelector } from "react-redux";
 import { uiActions } from "../../store/reducers/ui-slice";
+import { householdActions } from "../../store/reducers/household-slice";
 
 export default function userModal() {
   const dispatch = useDispatch();
@@ -16,6 +17,8 @@ export default function userModal() {
     dispatch(uiActions.showModal());
     if (formRef.current) {
       formRef.current.restoreOriginalData();
+      dispatch(householdActions.setTask(null));
+      dispatch(householdActions.setIsTaskEdit());
     }
   };
 
