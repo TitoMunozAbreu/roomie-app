@@ -40,6 +40,7 @@ const householdSlice = createSlice({
         state.households.push(action.payload);
       } else {
         state.households = [action.payload];
+        state.selectedHousehold = state.households[0];
       }
     },
     deleteHouseholdById(state, action) {
@@ -49,6 +50,7 @@ const householdSlice = createSlice({
       }
       if (state.households.length === 0) {
         state.households = [];
+        state.selectedHousehold = null;
       }
     },
     updateSelecteHousehold(state, action) {
@@ -78,6 +80,9 @@ const householdSlice = createSlice({
 
         if (taskIndex !== -1) {
           state.households[householdIndex].tasks[taskIndex] = action.payload;
+        }else {
+          state.households[householdIndex].tasks = [];
+          state.households[householdIndex].tasks.push(action.payload);
         }
       }
     },

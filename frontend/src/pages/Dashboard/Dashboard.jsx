@@ -59,7 +59,7 @@ const Dashboard = () => {
     if (households === null || households.length === 0) {
       dispatch(getHouseholds());
     }
-  }, [errorMessage, dispatch]);
+  }, [errorMessage, selectedHousehold, dispatch]);
 
   const renderTaskStateBadge = (status, isEditing, onEditStatus) => {
     const statusOptions = [
@@ -208,13 +208,14 @@ const Dashboard = () => {
     <>
       {notification?.type && <Notification />}
       <h2 style={{ textAlign: "start" }}>Households</h2>
+      {errorMessage && households.length === 0 && <span>{errorMessage}</span>}
       {households && (
         <div>
           <Row gutter={16}>
             <Col span={6}>
               <Menu
                 mode="inline"
-                defaultSelectedKeys={[households[0].id]}
+                defaultSelectedKeys={[households[0]?.id]}
                 style={{ height: "100%", borderRight: 0 }}
                 onSelect={({ key }) => updateSelectedHousehold(key)}
               >
@@ -249,7 +250,7 @@ const Dashboard = () => {
                   dataSource={
                     households
                       .find(
-                        (household) => household.id === selectedHousehold.id
+                        (household) => household?.id === selectedHousehold?.id
                       )
                       ?.tasks?.filter(
                         (task) =>
