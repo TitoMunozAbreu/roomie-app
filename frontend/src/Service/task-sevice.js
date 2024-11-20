@@ -28,11 +28,10 @@ const updateStatus = async (taskId, status) => {
   );
 };
 
-const deleteTask = async (task) => {
+const deleteTask = async (taskId) => {
   const userToken = localStorage.getItem("token");
   return await instance.delete(
-    `${ENDPOINTS.TASK.URL}${ENDPOINTS.TASK.URI}/${task}`,
-    {},
+    `${ENDPOINTS.TASK.URL}${ENDPOINTS.TASK.URI}/${taskId}`,
     { headers: { Authorization: `Bearer ${userToken}` } }
   );
 };

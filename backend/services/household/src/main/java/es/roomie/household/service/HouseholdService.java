@@ -14,6 +14,7 @@ import es.roomie.household.model.resquest.HouseholdRequest;
 import es.roomie.household.repository.HouseholdRepository;
 import es.roomie.household.service.client.feign.TaskClient;
 import es.roomie.household.service.client.feign.UserClient;
+import feign.FeignException;
 import feign.RetryableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -273,7 +274,7 @@ public class HouseholdService {
                 household.setTasks(taskResponses);
             });
 
-        } catch (RetryableException e) {
+        } catch (FeignException e) {
             log.error(e.getMessage());
         }
         return householdResponses;

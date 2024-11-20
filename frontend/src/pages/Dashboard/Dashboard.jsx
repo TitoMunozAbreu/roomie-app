@@ -22,13 +22,14 @@ import {
   PlusOutlined,
   CloseCircleOutlined,
   StopOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { getHouseholds } from "../../store/actions/household-actions";
 import { householdActions } from "../../store/reducers/household-slice";
 import UserModal from "../../components/Modal/user-modal";
 import { uiActions } from "../../store/reducers/ui-slice";
 import Notification from "../../components/Notification/Notification";
-import { updateStatus } from "../../store/actions/task-actions";
+import { deleteTask, updateStatus } from "../../store/actions/task-actions";
 
 const { TabPane } = Tabs;
 
@@ -189,14 +190,18 @@ const Dashboard = () => {
   };
 
   const handleEditStatus = (taskId, newStatus) => {
-    dispatch(updateStatus(selectedHousehold.id, taskId, newStatus))
+    dispatch(updateStatus(selectedHousehold.id, taskId, newStatus));
     setIsEditingStatus(false);
     setEditTaskStatus(null);
   };
 
-  const hanldeTaskStatus = (taskId) => {
+  const onClickStatus = (taskId) => {
     setEditTaskStatus(taskId);
     setIsEditingStatus(true);
+  };
+
+  const onClickDeleteTask = (taskId) => {
+    dispatch(deleteTask(selectedHousehold.id, taskId));
   };
 
   return (
@@ -255,18 +260,27 @@ const Dashboard = () => {
                   renderItem={(task) => (
                     <List.Item
                       extra={
-                        <Button
-                          variant="outlined"
-                          icon={<EditOutlined />}
-                          onClick={() => handleEditTask(task)}
-                        ></Button>
+                        <>
+                          <Button
+                            variant="outlined"
+                            icon={<DeleteOutlined />}
+                            danger
+                            style={{ marginRight: "1%" }}
+                            onClick={() => onClickDeleteTask(task.id)}
+                          ></Button>
+                          <Button
+                            variant="outlined"
+                            icon={<EditOutlined />}
+                            onClick={() => handleEditTask(task)}
+                          ></Button>
+                        </>
                       }
                     >
                       <List.Item.Meta
                         title={task.title}
                         description={
                           <div
-                            onClick={() => hanldeTaskStatus(task.id)}
+                            onClick={() => onClickStatus(task.id)}
                             style={{ cursor: "pointer" }}
                           >
                             {renderTaskStateBadge(

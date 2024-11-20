@@ -44,6 +44,29 @@ export const updateTask = (task) => {
   };
 };
 
+export const deleteTask = (householdId, taskId) => {
+  return async (dispatch) => {
+    const deleteTaskToHousehold = async () => {
+      return await taskService.deleteTask(taskId);
+    };
+
+    deleteTaskToHousehold()
+      .then(function (response) {
+        dispatch(
+          householdActions.deleteTaskToHousehold({
+            householdId: householdId,
+            taskId: taskId,
+          })
+        );
+        handleNotification("Task deleted.", dispatch);
+      })
+      .catch(function (error) {
+        console.log(error);
+        handleErrorResponse(error, dispatch);
+      });
+  };
+};
+
 export const updateStatus = (householdId, taskId, status) => {
   return async (dispatch) => {
     const updateTaskStatus = async () => {
@@ -62,7 +85,6 @@ export const updateStatus = (householdId, taskId, status) => {
         handleNotification("Status updated.", dispatch);
       })
       .catch(function (error) {
-        console.log(error);        
         handleErrorResponse(error, dispatch);
       });
   };

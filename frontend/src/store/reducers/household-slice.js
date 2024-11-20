@@ -94,7 +94,27 @@ const householdSlice = createSlice({
         );
 
         if (taskIndex !== -1) {
-          state.households[householdIndex].tasks[taskIndex].status = action.payload.status;
+          state.households[householdIndex].tasks[taskIndex].status =
+            action.payload.status;
+        }
+      }
+    },
+    deleteTaskToHousehold(state, action) {
+      const householdIndex = state.households.findIndex(
+        (h) => h.id === action.payload.householdId
+      );
+
+      if (householdIndex !== -1) {
+        const taskIndex = state.households[householdIndex].tasks.findIndex(
+          (t) => t.id === action.payload.taskId
+        );
+
+        if (taskIndex !== -1) {
+          state.households[householdIndex].tasks.splice(taskIndex, 1);
+
+          if (state.households[householdIndex].tasks.length === 0) {
+            state.households[householdIndex].tasks = [];
+          }
         }
       }
     },
