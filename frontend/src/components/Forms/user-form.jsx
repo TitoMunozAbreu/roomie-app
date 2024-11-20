@@ -23,8 +23,10 @@ import {
 } from "../../store/actions/user-actions";
 import moment from "moment";
 import { createNewTask, updateTask } from "../../store/actions/task-actions";
+import { uiActions } from "../../store/reducers/ui-slice";
+import { householdActions } from "../../store/reducers/household-slice";
 
-const UserForm = forwardRef(({ formType }, ref) => {
+const UserForm = () => {
   const dispatch = useDispatch();
 
   const modalType = useSelector((state) => state.ui.profile.modal.type);
@@ -34,74 +36,70 @@ const UserForm = forwardRef(({ formType }, ref) => {
   const selectedHousehold = useSelector(
     (state) => state.households.selectedHousehold
   );
+  const isFormSubmitTriggered = useSelector((state) => state.ui.submitForm);
 
   const [form] = Form.useForm();
   const [originalData, setOriginalData] = useState(null);
 
-  useImperativeHandle(ref, () => ({
-    submit: () => {
-      form.submit();
-    },
-    reset: () => {
+  useEffect(() => {
+    if (!isTaskEdit) {
       form.resetFields();
-    },
-    restoreOriginalData: () => {
-      if (originalData) {
-        form.setFieldsValue(originalData);
-      }
-    },
-  }));
+      dispatch(householdActions.setTask(null));
+    }
+  }, [isTaskEdit, form, dispatch]);
 
   useEffect(() => {
-    if (modalType !== "formTask") {
-      const formattedData = {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        preferences:
-          user.taskPreferences?.map((item) => ({
-            taskName: item.taskName,
-            preference: item.preference,
-          })) || [],
-        availabilities:
-          user.availabilities?.map((item) => ({
-            day: item.day,
-            hours: item.hours,
-          })) || [],
-      };
-      form.setFieldsValue(formattedData);
-      setOriginalData(formattedData);
-    } else {
-      if (selectedTask) {
-        const formattedData = {
-          householdId: selectedTask.householdId,
-          createdBy: selectedTask.createdBy,
-          title: selectedTask.title,
-          description: selectedTask.description,
-          category: selectedTask.category,
-          estimatedDuration: selectedTask.estimatedDuration,
-          assignedTo: selectedTask.assignedTo,
-          dueDate: moment(selectedTask.dueDate),
-          status: selectedTask.status,
-        };
-        form.setFieldsValue(formattedData);
-        setOriginalData(formattedData);
-      } else {
-        const formattedData = {
-          householdId: selectedHousehold.id,
-          createdBy: user.mail,
-          title: null,
-          description: null,
-          category: null,
-          estimatedDuration: null,
-          assignedTo: null,
-          dueDate: null,
-          status: null,
-        };
-        form.setFieldsValue(formattedData);
-        setOriginalData(formattedData);
-      }
+    if (isFormSubmitTriggered) {
+      console.log("submitting form");
+      
+      form.submit();
     }
-  }, [user, selectedHousehold, selectedTask, form]);
+  }, [isFormSubmitTriggered, form, dispatch]);
+
+  useEffect(() => {
+    let formattedData = {};
+
+    if (modalType !== "formTask" && user) {
+      console.log("if", user);
+      formattedData = formatUserData(user);
+    } else if (selectedHousehold || selectedTask) {
+      console.log("else if", selectedHousehold);
+
+      formattedData = formatTaskData(selectedTask);
+    }
+    console.log(formattedData);
+
+    form.setFieldsValue(formattedData);
+    setOriginalData(formattedData);
+  }, [modalType, user, selectedHousehold, selectedTask, form]);
+
+  const formatUserData = (user) => ({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    preferences:
+      user.taskPreferences?.map((item) => ({
+        taskName: item.taskName,
+        preference: item.preference,
+      })) || [],
+    availabilities:
+      user.availabilities?.map((item) => ({
+        day: item.day,
+        hours: item.hours,
+      })) || [],
+  });
+
+  const formatTaskData = (task) => ({
+    taskId: task?.id || null,
+    householdId: task?.householdId || selectedHousehold?.id,
+    createdBy: task?.createdBy || user?.email,
+    title: task?.title || "",
+    description: task?.description || "",
+    category: task?.category || null,
+    estimatedDuration: task?.estimatedDuration || null,
+    assignedTo: task?.assignedTo || null,
+    dueDate: task?.dueDate ? moment(task.dueDate) : null,
+    status: task?.status || null,
+  });
 
   const formUserInfo = () => {
     return (
@@ -303,6 +301,13 @@ const UserForm = forwardRef(({ formType }, ref) => {
         <div>
           <Row gutter={16}>
             <Col span={12}>
+              <Form.Item label="taskId" name="taskId" hidden></Form.Item>
+              <Form.Item label="householdId" name="householdId" hidden></Form.Item>
+              <Form.Item label="createdBy" name="createdBy" hidden></Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
               {/* Title */}
               <Form.Item
                 label="Title"
@@ -412,17 +417,16 @@ const UserForm = forwardRef(({ formType }, ref) => {
   };
 
   const onFinish = (values) => {
-    if (formType === "formPreferences") {
+    if (modalType === "formPreferences") {
       dispatch(updatePreferences(user.id, values.preferences));
-    } else if (formType === "formUserInfo") {
+    } else if (modalType === "formUserInfo") {
       // dispatch(updateUserInfo(values.userInfo));
-    } else if (formType === "formAvailabilities") {
+    } else if (modalType === "formAvailabilities") {
       dispatch(updateAvailabilities(user.id, values.availabilities));
-    } else if (formType === "formTask") {
-      console.log(isTaskEdit);      
-      if (isTaskEdit) {        
-        dispatch(updateTask(selectedHousehold.id, values));
-      }else {
+    } else if (modalType === "formTask") {
+      if (isTaskEdit) {
+        dispatch(updateTask(values));
+      } else {
         dispatch(createNewTask(values));
       }
     }
@@ -436,6 +440,6 @@ const UserForm = forwardRef(({ formType }, ref) => {
       {modalType === "formTask" && formTask()}
     </>
   );
-});
+};
 
 export default UserForm;

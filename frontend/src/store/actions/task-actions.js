@@ -10,38 +10,74 @@ export const createNewTask = (task) => {
 
     createTask()
       .then(function (response) {
+        dispatch(uiActions.showModal());
         dispatch(householdActions.addNewTaskToHouseHold(response.data));
         handleNotification("Task created.", dispatch);
+        dispatch(uiActions.resetFormSubmit());
       })
       .catch(function (error) {
+        handleErrorResponse(error, dispatch);
+        dispatch(uiActions.resetFormSubmit());
+      });
+  };
+};
+
+export const updateTask = (task) => {
+  return async (dispatch) => {
+    const updateTask = async () => {
+      return await taskService.updateTask(task);
+    };
+
+    updateTask()
+      .then(function (response) {
+        dispatch(uiActions.showModal());
+        dispatch(householdActions.updateTaskToHouseHold(response.data));
+        handleNotification("Task updated.", dispatch);
+        dispatch(householdActions.setIsTaskEdit(false));
+        dispatch(uiActions.resetFormSubmit());
+      })
+      .catch(function (error) {
+        handleErrorResponse(error, dispatch);
+        dispatch(householdActions.setIsTaskEdit(false));
+        dispatch(uiActions.resetFormSubmit());
+      });
+  };
+};
+
+export const updateStatus = (householdId, taskId, status) => {
+  return async (dispatch) => {
+    const updateTaskStatus = async () => {
+      return await taskService.updateStatus(taskId, status);
+    };
+
+    updateTaskStatus()
+      .then(function (response) {
+        dispatch(
+          householdActions.udpateTaskStatus({
+            householdId: householdId,
+            taskId: taskId,
+            status: response.data.status,
+          })
+        );
+        handleNotification("Status updated.", dispatch);
+      })
+      .catch(function (error) {
+        console.log(error);        
         handleErrorResponse(error, dispatch);
       });
   };
 };
 
-
-export const updateTask = (householdId, task) => {
-    return async (dispatch) => {
-      const updateTask = async () => {
-        return await taskService.updateTask(householdId,task);
-      };
-  
-      updateTask()
-        .then(function (response) {
-          dispatch(householdActions.updateTaskToHouseHold(response.data));
-          handleNotification("Task updated.", dispatch);
-        })
-        .catch(function (error) {
-          handleErrorResponse(error, dispatch);
-        });
-    };
-  };
-
 const handleErrorResponse = (error, dispatch) => {
+  const errorMessage =
+    error.response && error.response.data
+      ? error.response.data
+      : "An unexpected error occurred.";
+
   dispatch(
     uiActions.showNotification({
       type: "error",
-      message: error.response.data,
+      message: errorMessage,
     })
   );
 };

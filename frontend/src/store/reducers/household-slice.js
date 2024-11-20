@@ -4,7 +4,7 @@ const initialState = {
   households: null,
   selectedHousehold: null,
   selectedTask: null,
-  isTaskEdit: false
+  isTaskEdit: false,
 };
 
 const householdSlice = createSlice({
@@ -57,8 +57,8 @@ const householdSlice = createSlice({
     setTask(state, action) {
       state.selectedTask = action.payload;
     },
-    setIsTaskEdit(state) {
-      state.isTaskEdit = !state.isTaskEdit;
+    setIsTaskEdit(state, action) {
+      state.isTaskEdit = action.payload;
     },
     addNewTaskToHouseHold(state, action) {
       const household = state.households.find(
@@ -73,13 +73,30 @@ const householdSlice = createSlice({
 
       if (householdIndex !== -1) {
         const taskIndex = state.households[householdIndex].tasks.findIndex(
-          (t) => t.id === id
+          (t) => t.id === action.payload.id
         );
-      }
 
-      if (taskIndex !== -1) {
-        state.households[householdIndex].tasks[taskIndex] = updatedTask;
-      } 
+        if (taskIndex !== -1) {
+          state.households[householdIndex].tasks[taskIndex] = action.payload;
+        }
+      }
+    },
+    udpateTaskStatus(state, action) {
+      console.log(action.payload);
+
+      const householdIndex = state.households.findIndex(
+        (h) => h.id === action.payload.householdId
+      );
+
+      if (householdIndex !== -1) {
+        const taskIndex = state.households[householdIndex].tasks.findIndex(
+          (t) => t.id === action.payload.taskId
+        );
+
+        if (taskIndex !== -1) {
+          state.households[householdIndex].tasks[taskIndex].status = action.payload.status;
+        }
+      }
     },
   },
 });

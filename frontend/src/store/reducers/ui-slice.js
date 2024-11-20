@@ -14,6 +14,7 @@ const initialState = {
   },
   notification: null,
   errorMessage: null,
+  submitForm: false,
 };
 
 const uiSlice = createSlice({
@@ -50,6 +51,12 @@ const uiSlice = createSlice({
     },
     updateErrorMessage(state, action) {
       state.errorMessage = action.payload;
+    },
+    handleSubmitForm(state) {
+      state.submitForm = true;
+    },
+    resetFormSubmit(state) {
+      state.submitForm = false;
     },
   },
 });

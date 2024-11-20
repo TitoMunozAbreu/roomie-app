@@ -11,21 +11,16 @@ export default function userModal() {
   const modalTitle = useSelector((state) => state.ui.profile.modal.title);
   const modalType = useSelector((state) => state.ui.profile.modal.type);
 
-  const formRef = useRef(null);
-
   const handleCancel = () => {
     dispatch(uiActions.showModal());
-    if (formRef.current) {
-      formRef.current.restoreOriginalData();
-      dispatch(householdActions.setTask(null));
-      dispatch(householdActions.setIsTaskEdit());
+    if (modalType === "formTask") {
+      dispatch(householdActions.setIsTaskEdit(false));
+      dispatch(uiActions.resetFormSubmit());
     }
   };
 
   const handleSendForm = () => {
-    if (formRef.current) {
-      formRef.current.submit();
-    }
+    dispatch(uiActions.handleSubmitForm());
   };
 
   return (
@@ -43,7 +38,7 @@ export default function userModal() {
         </Button>,
       ]}
     >
-      <UserForm ref={formRef} formType={modalType} />
+      <UserForm />
     </Modal>
   );
 }
