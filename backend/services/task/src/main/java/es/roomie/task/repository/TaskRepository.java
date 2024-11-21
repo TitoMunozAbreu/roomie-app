@@ -12,4 +12,6 @@ public interface TaskRepository extends MongoRepository<Task, String> {
 
     @Query("{'householdId': {'$in':  ?0 } }")
     List<Task> findByHouseholdIdIn(List<String> householdIds);
+
+    void deleteByHouseholdId(String householdId);
 }

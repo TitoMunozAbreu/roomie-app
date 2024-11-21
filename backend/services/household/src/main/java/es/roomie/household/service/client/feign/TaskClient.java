@@ -16,4 +16,6 @@ public interface TaskClient {
 
     @GetMapping
     ResponseEntity<List<TaskResponse>> getTasksByHouseholdIdIn(@RequestParam List<String> householdIds);
+
+    ResponseEntity<?> deleteTaskByHouseholdId(@RequestParam String householdId);
 }

@@ -46,4 +46,9 @@ public class TaskController {
         return taskService.deleteTask(taskId);
     }
 
+    @DeleteMapping()
+    public ResponseEntity<?> deleteAllTasks(@RequestParam String householdId) {
+        return  taskService.deleteAllTasks(householdId);
+    }
+
 }

@@ -34,7 +34,9 @@ public class TaskService {
         log.info("Fetch tasks");
         List<Task> tasks = taskRepository.findByHouseholdIdIn(householdIds);
 
-        if(tasks.isEmpty()) {throw  new ResourceNotFoundException("No tasks found with ids: " + householdIds);}
+        if (tasks.isEmpty()) {
+            throw new ResourceNotFoundException("No tasks found with ids: " + householdIds);
+        }
 
         return new ResponseEntity<>(taskMapper.mapToTasksResponse(tasks), OK);
     }
@@ -102,5 +104,12 @@ public class TaskService {
 
     private void incrementCompletedTask(Task task) {
         task.getStatistics().incrementCompletedTasks();
+    }
+
+    public ResponseEntity<?> deleteAllTasks(String householdId) {
+        log.info("Delete all tasks");
+        taskRepository.deleteByHouseholdId(householdId);
+
+        return new ResponseEntity<>("Deleted all tasks", OK);
     }
 }
