@@ -1,6 +1,6 @@
 spring:
   application:
-    name: household-service
+    name: task-service
   config:
     import: optional:configserver:http://localhost:8888
   security:
@@ -11,9 +11,3 @@ spring:
 #Auth service
 keycloak:
   realm: roomie_app
-
-#Feign client
-user:
-  url: ${USER_URL:http://localhost:8085/api/v1/users}
-task:
-  url: ${TASK_URL:http://localhost:8240/api/v1/tasks}

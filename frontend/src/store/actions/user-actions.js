@@ -14,21 +14,11 @@ export const updatePreferences = (id, preferences) => {
         dispatch(
           userActions.updatePreferences({ taskPreferences: response.data })
         );
-        dispatch(
-          uiActions.showNotification({
-            type: "success",
-            message: "Task preferences updated!",
-          })
-        );
+        handleNotification("Task preferences updated!", dispatch);
       })
       .catch(function (error) {
         dispatch(uiActions.showModal());
-        dispatch(
-          uiActions.showNotification({
-            type: "error",
-            message: error.response.data,
-          })
-        );
+        handleErrorResponse(error, dispatch);
       });
   };
 };
@@ -44,21 +34,36 @@ export const updateAvailabilities = (id, availabilities) => {
         dispatch(
           userActions.updateAvailabilities({ availabilities: response.data })
         );
-        dispatch(
-          uiActions.showNotification({
-            type: "success",
-            message: "Availabilities updated!",
-          })
-        );
+        handleNotification("Availabilities updated!", dispatch);
+        dispatch(uiActions.resetFormSubmit());
       })
-      .catch(function (errorResponse) {
+      .catch(function (error) {
         dispatch(uiActions.showModal());
-        dispatch(
-          uiActions.showNotification({
-            type: "error",
-            message: errorResponse.data,
-          })
-        );
+        handleErrorResponse(error, dispatch);
+        dispatch(uiActions.resetFormSubmit());
       });
   };
+};
+
+const handleErrorResponse = (error, dispatch) => {
+  const errorMessage =
+    error.response && error.response.data
+      ? error.response.data
+      : "An unexpected error occurred.";
+
+  dispatch(
+    uiActions.showNotification({
+      type: "error",
+      message: errorMessage,
+    })
+  );
+};
+
+const handleNotification = (message, dispatch) => {
+  dispatch(
+    uiActions.showNotification({
+      type: "success",
+      message: message,
+    })
+  );
 };

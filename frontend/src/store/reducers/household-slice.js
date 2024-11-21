@@ -2,6 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   households: null,
+  selectedHousehold: null,
+  selectedTask: null,
+  isTaskEdit: false,
 };
 
 const householdSlice = createSlice({
@@ -10,6 +13,7 @@ const householdSlice = createSlice({
   reducers: {
     setHouseholds(state, action) {
       state.households = action.payload;
+      state.selectedHousehold = state.households[0];
     },
     updateHouseholdName(state, action) {
       if (state.households) {
@@ -36,6 +40,7 @@ const householdSlice = createSlice({
         state.households.push(action.payload);
       } else {
         state.households = [action.payload];
+        state.selectedHousehold = state.households[0];
       }
     },
     deleteHouseholdById(state, action) {
@@ -45,6 +50,77 @@ const householdSlice = createSlice({
       }
       if (state.households.length === 0) {
         state.households = [];
+        state.selectedHousehold = null;
+      }
+    },
+    updateSelecteHousehold(state, action) {
+      state.selectedHousehold = action.payload;
+    },
+    setTask(state, action) {
+      state.selectedTask = action.payload;
+    },
+    setIsTaskEdit(state, action) {
+      state.isTaskEdit = action.payload;
+    },
+    addNewTaskToHouseHold(state, action) {
+      const household = state.households.find(
+        (h) => h.id === action.payload.householdId
+      );
+      household.tasks.push(action.payload);
+    },
+    updateTaskToHouseHold(state, action) {
+      const householdIndex = state.households.findIndex(
+        (h) => h.id === action.payload.householdId
+      );
+
+      if (householdIndex !== -1) {
+        const taskIndex = state.households[householdIndex].tasks.findIndex(
+          (t) => t.id === action.payload.id
+        );
+
+        if (taskIndex !== -1) {
+          state.households[householdIndex].tasks[taskIndex] = action.payload;
+        }else {
+          state.households[householdIndex].tasks = [];
+          state.households[householdIndex].tasks.push(action.payload);
+        }
+      }
+    },
+    udpateTaskStatus(state, action) {
+      console.log(action.payload);
+
+      const householdIndex = state.households.findIndex(
+        (h) => h.id === action.payload.householdId
+      );
+
+      if (householdIndex !== -1) {
+        const taskIndex = state.households[householdIndex].tasks.findIndex(
+          (t) => t.id === action.payload.taskId
+        );
+
+        if (taskIndex !== -1) {
+          state.households[householdIndex].tasks[taskIndex].status =
+            action.payload.status;
+        }
+      }
+    },
+    deleteTaskToHousehold(state, action) {
+      const householdIndex = state.households.findIndex(
+        (h) => h.id === action.payload.householdId
+      );
+
+      if (householdIndex !== -1) {
+        const taskIndex = state.households[householdIndex].tasks.findIndex(
+          (t) => t.id === action.payload.taskId
+        );
+
+        if (taskIndex !== -1) {
+          state.households[householdIndex].tasks.splice(taskIndex, 1);
+
+          if (state.households[householdIndex].tasks.length === 0) {
+            state.households[householdIndex].tasks = [];
+          }
+        }
       }
     },
   },

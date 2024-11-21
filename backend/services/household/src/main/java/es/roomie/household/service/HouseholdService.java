@@ -5,28 +5,29 @@ import es.roomie.household.exceptions.ResourceNotFoundException;
 import es.roomie.household.mapper.HouseholdMapper;
 import es.roomie.household.model.Household;
 import es.roomie.household.model.Member;
+import es.roomie.household.model.feign.TaskResponse;
 import es.roomie.household.model.feign.UserResponse;
 import es.roomie.household.model.response.HouseholdNameResponse;
 import es.roomie.household.model.response.HouseholdResponse;
 import es.roomie.household.model.response.MemberResponse;
 import es.roomie.household.model.resquest.HouseholdRequest;
 import es.roomie.household.repository.HouseholdRepository;
+import es.roomie.household.service.client.feign.TaskClient;
 import es.roomie.household.service.client.feign.UserClient;
+import feign.FeignException;
 import feign.RetryableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static es.roomie.household.config.enums.Role.admin;
 import static es.roomie.household.config.enums.Role.member;
+import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -37,11 +38,13 @@ public class HouseholdService {
     private final HouseholdMapper householdMapper;
     private final HouseholdRepository householdRepository;
     private final UserClient userClient;
+    private final TaskClient taskClient;
 
-    public HouseholdService(HouseholdMapper householdMapper, HouseholdRepository householdRepository, UserClient userClient) {
+    public HouseholdService(HouseholdMapper householdMapper, HouseholdRepository householdRepository, UserClient userClient, TaskClient taskClient) {
         this.householdMapper = householdMapper;
         this.householdRepository = householdRepository;
         this.userClient = userClient;
+        this.taskClient = taskClient;
     }
 
     public ResponseEntity<HouseholdResponse> createHousehold(HouseholdRequest householRequest) {
@@ -72,8 +75,7 @@ public class HouseholdService {
 
         getMembersDataFromHouseholds(householdResponses);
 
-        //TODO: get task from task-service
-        log.info("Get task by household from task-service...");
+        getTasksDataFromHouseholdIds(householdResponses);
 
         return new ResponseEntity<>(householdResponses, OK);
     }
@@ -115,6 +117,18 @@ public class HouseholdService {
         log.info("Sent notification to users...");
 
         return new ResponseEntity<>(householdResponse, OK);
+    }
+
+    public ResponseEntity<HouseholdNameResponse> updateHouseholdName(String householdId, String userId, String name) {
+        Household household = householdRepository.findByIdAndMemberUserId(householdId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found or lacks permissions to access this resource."));
+
+        log.info("Updating household name");
+        household.setHouseholdName(name);
+        householdRepository.save(household);
+
+        return new ResponseEntity<>(householdMapper.mapToHouseholdNameResponse(household), OK);
+
     }
 
     public ResponseEntity<HouseholdResponse> deleteMemberByHouseHold(String householdId, String adminMemberEmail, String memberEmail) {
@@ -164,7 +178,7 @@ public class HouseholdService {
         //TODO: send message to notification-service "deleted household"
         log.info("Sent notification to user...");
 
-        return new ResponseEntity<>("Deleted household",OK);
+        return new ResponseEntity<>("Deleted household", OK);
     }
 
     private static boolean isMemberAdmin(String adminMemberEmail, Household householdFound) {
@@ -189,11 +203,11 @@ public class HouseholdService {
             log.error(e.getMessage());
         }
 
-        if(users != null && !users.isEmpty()) {
+        if (users != null && !users.isEmpty()) {
             Map<String, UserResponse> userResponseMap = users.stream()
-                    .collect(Collectors.toMap(UserResponse::email, Function.identity()));
+                    .collect(toMap(UserResponse::email, Function.identity()));
 
-            for( HouseholdResponse householdResponse : householdResponses) {
+            for (HouseholdResponse householdResponse : householdResponses) {
 
                 List<MemberResponse> memberResponses = householdResponse.getMembers().stream()
                         .map(member -> {
@@ -223,31 +237,47 @@ public class HouseholdService {
             log.error(e.getMessage());
         }
 
-        if(users != null && !users.isEmpty()) {
+        if (users != null && !users.isEmpty()) {
             Map<String, UserResponse> userResponseMap = users.stream()
-                    .collect(Collectors.toMap(UserResponse::email, Function.identity()));
+                    .collect(toMap(UserResponse::email, Function.identity()));
 
-                List<MemberResponse> memberResponses = householdResponse.getMembers().stream()
-                        .map(member -> {
-                            UserResponse userResponse = userResponseMap.get(member.getEmail());
-                            return HouseholdMapper.mapUsersToMemberResponse(member, userResponse);
-                        })
-                        .toList();
+            List<MemberResponse> memberResponses = householdResponse.getMembers().stream()
+                    .map(member -> {
+                        UserResponse userResponse = userResponseMap.get(member.getEmail());
+                        return HouseholdMapper.mapUsersToMemberResponse(member, userResponse);
+                    })
+                    .toList();
 
-                householdResponse.setMembers(memberResponses);
+            householdResponse.setMembers(memberResponses);
         }
         return householdResponse;
     }
 
-    public ResponseEntity<HouseholdNameResponse> updateHouseholdName(String householdId, String userId, String name) {
-        Household household = householdRepository.findByIdAndMemberUserId(householdId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Member not found or lacks permissions to access this resource."));
+    private List<HouseholdResponse> getTasksDataFromHouseholdIds(List<HouseholdResponse> householdResponses) {
 
-        log.info("Updating household name");
-        household.setHouseholdName(name);
-        householdRepository.save(household);
+        List<String> householdIds = householdResponses.stream()
+                .map(HouseholdResponse::getId)
+                .toList();
 
-        return new ResponseEntity<>(householdMapper.mapToHouseholdNameResponse(household), OK);
+        try {
+            log.info("Fetch from task-service task info by householdIds {}", householdIds);
+            //Group tasks by householdId
+            Map<String, List<TaskResponse>> taskResponseMap = Objects.requireNonNull(taskClient.getTasksByHouseholdIdIn(householdIds)
+                            .getBody())
+                    .stream()
+                    .collect(Collectors.groupingBy(TaskResponse::getHouseholdId));
 
+            //assign tasks to each household
+            householdResponses.forEach(household -> {
+                List<TaskResponse> taskResponses = taskResponseMap.getOrDefault(household.getId(), Collections.emptyList());
+
+                household.setTasks(taskResponses);
+            });
+
+        } catch (FeignException e) {
+            log.error(e.getMessage());
+        }
+        return householdResponses;
     }
+
 }

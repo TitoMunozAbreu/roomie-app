@@ -1,7 +1,7 @@
 // Dashboard.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  Layout,
   Menu,
   Card,
   List,
@@ -12,6 +12,7 @@ import {
   Tag,
   Row,
   Col,
+  Select,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -19,111 +20,288 @@ import {
   ExclamationCircleOutlined,
   EditOutlined,
   PlusOutlined,
+  CloseCircleOutlined,
+  StopOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
+import { getHouseholds } from "../../store/actions/household-actions";
+import { householdActions } from "../../store/reducers/household-slice";
+import UserModal from "../../components/Modal/user-modal";
+import { uiActions } from "../../store/reducers/ui-slice";
+import Notification from "../../components/Notification/Notification";
+import { deleteTask, updateStatus } from "../../store/actions/task-actions";
 
-const { Header, Content, Sider } = Layout;
 const { TabPane } = Tabs;
 
-const households = [
-  {
-    id: "household1",
-    name: "Casa de la Playa",
-    tasks: [
-      { id: "task1", name: "Limpiar la nevera", state: "Pendiente" },
-      { id: "task2", name: "Lavar los platos", state: "Completada" },
-      { id: "task3", name: "Regar las plantas", state: "En Progreso" },
-    ],
-  },
-  {
-    id: "household2",
-    name: "Apartamento Centro",
-    tasks: [
-      { id: "task4", name: "Aspirar la sala", state: "Pendiente" },
-      { id: "task5", name: "Limpiar el baño", state: "Completada" },
-    ],
-  },
+const taskStates = [
+  "All",
+  "Pending",
+  "Progress",
+  "Overdue",
+  "Completed",
+  "Cancelled",
 ];
 
-const taskStates = ["Todas", "Pendiente", "En Progreso", "Completada"];
-
 const Dashboard = () => {
-  const [selectedHousehold, setSelectedHousehold] = useState(households[0].id);
-  const [selectedFilter, setSelectedFilter] = useState("Todas");
+  const dispatch = useDispatch();
+  const households = useSelector((state) => state.households.households);
+  const selectedHousehold = useSelector(
+    (state) => state.households.selectedHousehold
+  );
+  const errorMessage = useSelector((state) => state.ui.errorMessage);
+  const notification = useSelector((state) => state.ui.notification);
 
-  const filteredTasks = households
-    .find((household) => household.id === selectedHousehold)
-    .tasks.filter(
-      (task) => selectedFilter === "Todas" || task.state === selectedFilter
-    );
+  const [selectedFilter, setSelectedFilter] = useState("All");
+  const [isEditingStatus, setIsEditingStatus] = useState(false);
+  const [editTaskStatus, setEditTaskStatus] = useState(null);
 
-  const renderTaskStateBadge = (state) => {
-    switch (state) {
-      case "Pendiente":
+  useEffect(() => {
+    if (households === null || households.length === 0) {
+      dispatch(getHouseholds());
+    }
+  }, [errorMessage, selectedHousehold, dispatch]);
+
+  const renderTaskStateBadge = (status, isEditing, onEditStatus) => {
+    const statusOptions = [
+      {
+        label: (
+          <Tag icon={<ExclamationCircleOutlined />} color="orange">
+            Pending
+          </Tag>
+        ),
+        value: "Pending",
+      },
+      {
+        label: (
+          <Tag icon={<ClockCircleOutlined />} color="blue">
+            In Progress
+          </Tag>
+        ),
+        value: "Progress",
+      },
+      {
+        label: (
+          <Tag icon={<CloseCircleOutlined />} color="red">
+            Overdue
+          </Tag>
+        ),
+        value: "Overdue",
+      },
+      {
+        label: (
+          <Tag icon={<CheckCircleOutlined />} color="green">
+            Completed
+          </Tag>
+        ),
+        value: "Completed",
+      },
+      {
+        label: (
+          <Tag icon={<StopOutlined />} color="gray">
+            Cancelled
+          </Tag>
+        ),
+        value: "Cancelled",
+      },
+    ];
+
+    if (isEditing) {
+      return (
+        <Select
+          defaultValue={status}
+          options={statusOptions}
+          tagRender={statusOptions}
+          onChange={onEditStatus}
+          style={{ height: 25 }}
+          optionLabelProp="label"
+          onBlur={() => {
+            setIsEditingStatus(false);
+            setEditTaskStatus(null);
+          }}
+        />
+      );
+    }
+
+    switch (status) {
+      case "Pending":
         return (
           <Tag icon={<ExclamationCircleOutlined />} color="orange">
-            Pendiente
+            Pending
           </Tag>
         );
-      case "En Progreso":
+      case "Progress":
         return (
           <Tag icon={<ClockCircleOutlined />} color="blue">
-            En Progreso
+            In Progress
           </Tag>
         );
-      case "Completada":
+      case "Overdue":
+        return (
+          <Tag icon={<CloseCircleOutlined />} color="red">
+            Overdue
+          </Tag>
+        );
+      case "Completed":
         return (
           <Tag icon={<CheckCircleOutlined />} color="green">
-            Completada
+            Completed
           </Tag>
         );
+      case "Cancelled":
+        return (
+          <Tag icon={<StopOutlined />} color="gray">
+            Cancelled
+          </Tag>
+        );
+      case "All":
+        return <Tag color="default">All</Tag>;
       default:
-        return <Tag color="default">{state}</Tag>;
+        return <Tag color="default">{status}</Tag>;
     }
+  };
+
+  const updateSelectedHousehold = (householdId) => {
+    const household = households.find((h) => h.id === householdId);
+    dispatch(householdActions.updateSelecteHousehold(household));
+    setSelectedFilter("All");
+  };
+
+  const handleCreateTask = () => {
+    dispatch(uiActions.showModal());
+    dispatch(householdActions.setIsTaskEdit(false));
+    dispatch(
+      uiActions.modalData({
+        title: "Create task",
+        type: "formTask",
+      })
+    );
+  };
+
+  const handleEditTask = (task) => {
+    dispatch(householdActions.setTask(task));
+    dispatch(householdActions.setIsTaskEdit(true));
+    dispatch(uiActions.showModal());
+    dispatch(
+      uiActions.modalData({
+        title: "Edit task",
+        type: "formTask",
+      })
+    );
+  };
+
+  const handleEditStatus = (taskId, newStatus) => {
+    dispatch(updateStatus(selectedHousehold.id, taskId, newStatus));
+    setIsEditingStatus(false);
+    setEditTaskStatus(null);
+  };
+
+  const onClickStatus = (taskId) => {
+    setEditTaskStatus(taskId);
+    setIsEditingStatus(true);
+  };
+
+  const onClickDeleteTask = (taskId) => {
+    dispatch(deleteTask(selectedHousehold.id, taskId));
   };
 
   return (
     <>
+      {notification?.type && <Notification />}
       <h2 style={{ textAlign: "start" }}>Households</h2>
-
-      <Row gutter={16}>
-        <Col span={6}>
-          <Menu
-            mode="inline"
-            defaultSelectedKeys={[households[0].id]}
-            style={{ height: "100%", borderRight: 0 }}
-            onSelect={({ key }) => setSelectedHousehold(key)}
-          >
-            {households.map((household) => (
-              <Menu.Item key={household.id}>{household.name}</Menu.Item>
-            ))}
-          </Menu>
-          <Button variant="outlined" icon={<EditOutlined />}></Button>
-        </Col>
-        <Col span={18}>
-          <Card title="Resumen de Tareas">
-            <Tabs
-              defaultActiveKey="Todas"
-              onChange={(key) => setSelectedFilter(key)}
-            >
-              {taskStates.map((state) => (
-                <TabPane tab={state} key={state} />
-              ))}
-            </Tabs>
-            <List
-              itemLayout="horizontal"
-              dataSource={filteredTasks}
-              renderItem={(task) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={task.name}
-                    description={renderTaskStateBadge(task.state)}
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {errorMessage && households.length === 0 && <span>{errorMessage}</span>}
+      {households && (
+        <div>
+          <Row gutter={16}>
+            <Col span={6}>
+              <Menu
+                mode="inline"
+                defaultSelectedKeys={[households[0]?.id]}
+                style={{ height: "100%", borderRight: 0 }}
+                onSelect={({ key }) => updateSelectedHousehold(key)}
+              >
+                {households.map((household) => (
+                  <Menu.Item key={household.id}>
+                    {household.householdName}
+                  </Menu.Item>
+                ))}
+              </Menu>
+            </Col>
+            <Col span={18}>
+              <Card
+                title="Task Summary"
+                extra={
+                  <Button
+                    variant="outlined"
+                    icon={<PlusOutlined />}
+                    onClick={handleCreateTask}
+                  ></Button>
+                }
+              >
+                <Tabs
+                  defaultActiveKey="All"
+                  onChange={(key) => setSelectedFilter(key)}
+                >
+                  {taskStates.map((state) => (
+                    <TabPane tab={state} key={state} />
+                  ))}
+                </Tabs>
+                <List
+                  itemLayout="horizontal"
+                  dataSource={
+                    households
+                      .find(
+                        (household) => household?.id === selectedHousehold?.id
+                      )
+                      ?.tasks?.filter(
+                        (task) =>
+                          selectedFilter === "All" ||
+                          task.status === selectedFilter
+                      ) || []
+                  }
+                  renderItem={(task) => (
+                    <List.Item
+                      extra={
+                        <>
+                          <Button
+                            variant="outlined"
+                            icon={<DeleteOutlined />}
+                            danger
+                            style={{ marginRight: "1%" }}
+                            onClick={() => onClickDeleteTask(task.id)}
+                          ></Button>
+                          <Button
+                            variant="outlined"
+                            icon={<EditOutlined />}
+                            onClick={() => handleEditTask(task)}
+                          ></Button>
+                        </>
+                      }
+                    >
+                      <List.Item.Meta
+                        title={task.title}
+                        description={
+                          <div
+                            onClick={() => onClickStatus(task.id)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            {renderTaskStateBadge(
+                              task.status,
+                              editTaskStatus === task.id, // Comparar ID para editar solo esa tarea
+                              (newStatus) =>
+                                handleEditStatus(task.id, newStatus) // Pasar la función para actualizar
+                            )}
+                          </div>
+                        }
+                      />
+                    </List.Item>
+                  )}
+                />
+              </Card>
+            </Col>
+          </Row>
+          <UserModal />
+        </div>
+      )}
     </>
   );
 };
