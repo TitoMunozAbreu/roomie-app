@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>es.roomie</groupId>
 	<artifactId>household</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>household</name>
 	<description>household</description>
 	<url/>
