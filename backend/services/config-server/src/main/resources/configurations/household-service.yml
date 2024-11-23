@@ -11,9 +11,10 @@ spring:
     producer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
       properties:
-        spring.json.type.mapping: notificationMessage:es.roomie.household.kafka.NotificationMessage
+        spring.json.trusted.packages: '*'
+        spring.json.type.mapping: notificationMessage:es.roomie.household.kafka.NotificationMessage,newMemberInvitation:es.roomie.household.kafka.NewMemberInvitation
 
 server:
   port: 8095

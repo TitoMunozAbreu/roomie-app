@@ -3,6 +3,7 @@ package es.roomie.household.service;
 import es.roomie.household.exceptions.ForbiddenUserException;
 import es.roomie.household.exceptions.ResourceNotFoundException;
 import es.roomie.household.kafka.HouseholdProducer;
+import es.roomie.household.kafka.NewMemberInvitation;
 import es.roomie.household.kafka.NotificationMessage;
 import es.roomie.household.mapper.HouseholdMapper;
 import es.roomie.household.model.Household;
@@ -119,13 +120,15 @@ public class HouseholdService {
         //Send notification to each member added
         newMembers.forEach(
                 newMember -> {
-                    householdProducer.sendNewMemberConfirmation(
-                            new NotificationMessage(
-                                    "Removed from household",
-                                    String.format("You have been removed from the household '%s'.",
+                    householdProducer.sendNewMemberInvitation(
+                            new NewMemberInvitation(
+                                    "Welcome to the household",
+                                    String.format("You have been added to the household '%s'.",
                                             householdFound.getHouseholdName()),
-                                    newMember.getEmail())
+                                    newMember.getEmail(),
+                                    "http://localhost:5173/household/acceptInvitation")
                     );
+                    log.info("Sent notification to member {}", newMember.getEmail());
                 }
         );
         //Send notification to each member removed
@@ -138,9 +141,9 @@ public class HouseholdService {
                                             householdFound.getHouseholdName()),
                                     removedMember.getEmail())
                     );
+                    log.info("Sent notification to member {}", removedMember.getEmail());
                 }
         );
-        log.info("Sent notification to users...");
 
         return new ResponseEntity<>(householdResponse, OK);
     }
