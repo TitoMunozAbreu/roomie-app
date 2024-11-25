@@ -25,7 +25,7 @@ function App() {
         })
         .catch(() => {
           console.error("Failed to refresh token, or the session has expired");
-          keycloakInst.logout({ redirectUri: "http://localhost:5173/" });
+          //keycloakInst.logout({ redirectUri: "http://localhost:5173/" });
         });
     }, 60000);
 

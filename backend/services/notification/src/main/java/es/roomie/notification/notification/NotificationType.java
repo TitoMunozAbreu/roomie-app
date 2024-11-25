@@ -1,7 +1,6 @@
 package es.roomie.notification.notification;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 
 @AllArgsConstructor

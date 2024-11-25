@@ -126,7 +126,7 @@ public class HouseholdService {
                                     String.format("You have been added to the household '%s'.",
                                             householdFound.getHouseholdName()),
                                     newMember.getEmail(),
-                                    "http://localhost:5173/household/acceptInvitation")
+                                    String.format("http://localhost:5173/household/%s/acceptInvitation", householdFound.getId()))
                     );
                     log.info("Sent notification to member {}", newMember.getEmail());
                 }
@@ -158,6 +158,22 @@ public class HouseholdService {
 
         return new ResponseEntity<>(householdMapper.mapToHouseholdNameResponse(household), OK);
 
+    }
+
+    public ResponseEntity<?> isMemberInvitationAccepted(String householdId, String memberEmail, boolean invitationAccepted) {
+        Household household = householdRepository.findByIdAndMemberEmail(householdId, memberEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found or lacks permissions to access this resource."));
+
+        log.info("updating member invitation: {}", memberEmail);
+        household.getMembers().stream()
+                .filter(member -> member.getEmail().equals(memberEmail))
+                .forEach(member -> member.setInvitationAccepted(invitationAccepted));
+
+        householdRepository.save(household);
+
+        String messageResponse = invitationAccepted ? "Invitation updated successfully." : "Invitation rejected.";
+
+        return new ResponseEntity<>(messageResponse, OK);
     }
 
     public ResponseEntity<HouseholdResponse> deleteMemberByHouseHold(String householdId, String adminMemberEmail, String memberEmail) {
@@ -334,8 +350,7 @@ public class HouseholdService {
             taskClient.deleteTaskByHouseholdId(householdId);
 
         } catch (FeignException e) {
-            log.error(e.getMessage());
+            log.warn(e.getMessage());
         }
     }
-
 }
