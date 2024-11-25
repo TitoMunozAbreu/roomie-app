@@ -30,14 +30,6 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      // {
-      //   path: "/notifications",
-      //   element: (
-      //     <PrivateRoute>
-      //       <h2>notifications</h2>
-      //     </PrivateRoute>
-      //   ),
-      // },
       {
         path: "/profile",
         element: (

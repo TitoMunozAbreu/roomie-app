@@ -1,0 +1,21 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: user-service
+          uri: lb:http://USER-SERVICE
+          predicates:
+            - Path=/api/v1/users/**
+        - id: household-service
+          uri: lb:http://HOUSEHOLD-SERVICE
+          predicates:
+            - Path=/api/v1/households/**
+        - id: task-service
+          uri: lb:http://TASK-SERVICE
+          predicates:
+            - Path=/api/v1/tasks/**
+server:
+  port: 8222

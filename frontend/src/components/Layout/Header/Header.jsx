@@ -65,11 +65,6 @@ export default function AppHeader() {
       icon: <SettingOutlined />,
     },
     {
-      key: "notifications",
-      label: "Notifications",
-      icon: <MessageOutlined />,
-    },
-    {
       key: "user",
       label: (
         <>
