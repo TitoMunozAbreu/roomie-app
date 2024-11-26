@@ -66,6 +66,10 @@ const householdSlice = createSlice({
       const household = state.households.find(
         (h) => h.id === action.payload.householdId
       );
+      
+      if (household.tasks === null || household.tasks?.length === 0) {
+        household.tasks = [];
+      }
       household.tasks.push(action.payload);
     },
     updateTaskToHouseHold(state, action) {
@@ -80,7 +84,7 @@ const householdSlice = createSlice({
 
         if (taskIndex !== -1) {
           state.households[householdIndex].tasks[taskIndex] = action.payload;
-        }else {
+        } else {
           state.households[householdIndex].tasks = [];
           state.households[householdIndex].tasks.push(action.payload);
         }
