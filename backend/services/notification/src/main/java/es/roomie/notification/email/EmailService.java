@@ -42,7 +42,7 @@ public class EmailService {
         HashMap<String, Object> variables = new HashMap<>();
         variables.put("title", emailTitle);
         variables.put("description", emailDescription);
-        variables.put("urlConfirmInvatation", urlConfirmInvitation);
+        variables.put("urlConfirmInvitation", urlConfirmInvitation);
 
         Context context = new Context();
         context.setVariables(variables);
