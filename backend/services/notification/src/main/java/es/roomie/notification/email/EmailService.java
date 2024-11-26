@@ -13,8 +13,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.util.HashMap;
 
-import static es.roomie.notification.email.EmailTemplates.HOUSEHOLD_CONFIRMATION;
-import static es.roomie.notification.email.EmailTemplates.NEW_MEMBER_CONFIRMATION;
+import static es.roomie.notification.email.EmailTemplates.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.mail.javamail.MimeMessageHelper.MULTIPART_MODE_MIXED;
 
@@ -76,6 +75,42 @@ public class EmailService {
         HashMap<String, Object> variables = new HashMap<>();
         variables.put("title", emailTitle);
         variables.put("description", emailDescription);
+
+        Context context = new Context();
+        context.setVariables(variables);
+
+        try {
+            String htmlTemplate = templateEngine.process(templateName, context);
+            messageHelper.setText(htmlTemplate, true);
+
+            messageHelper.setTo(destinationEmail);
+            mailSender.send(mimeMessage);
+            log.info("INFO - Email successfully sent to '{}' with template {}", destinationEmail, templateName);
+        } catch (MessagingException e) {
+            log.warn("WARNING - Cannot send Email to {} ", destinationEmail);
+        }
+    }
+
+    @Async
+    public void sendTaskNotificationEmail(String destinationEmail,
+                                          String emailTitle,
+                                          String emailDescription,
+                                          String taskName,
+                                          String taskDueDate) throws MessagingException {
+
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, MULTIPART_MODE_MIXED, UTF_8.name());
+
+        messageHelper.setFrom("roomie@mail.com");
+        messageHelper.setSubject(TASK_CONFIRMATION.getSubject());
+
+        String templateName = TASK_CONFIRMATION.getTemplate();
+
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("title", emailTitle);
+        variables.put("description", emailDescription);
+        variables.put("taskName", taskName);
+        variables.put("taskDueDate", taskDueDate);
 
         Context context = new Context();
         context.setVariables(variables);

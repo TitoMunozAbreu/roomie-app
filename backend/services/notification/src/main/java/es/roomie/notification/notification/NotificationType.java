@@ -8,4 +8,5 @@ import lombok.Getter;
 public enum NotificationType {
     NEW_MEMBER_CONFIRMATION,
     HOUSEHOLD_CONFIRMATION,
+    TASK_CONFIRMATION,
 }

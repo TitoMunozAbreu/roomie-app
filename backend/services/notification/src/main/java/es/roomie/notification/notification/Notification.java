@@ -2,6 +2,7 @@ package es.roomie.notification.notification;
 
 import es.roomie.notification.kafka.household.NotificationMessage;
 import es.roomie.notification.kafka.household.NewMemberInvitation;
+import es.roomie.notification.kafka.task.TaskNotificationMessage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,4 +23,5 @@ public class Notification {
     private LocalDateTime notificationDate;
     private NewMemberInvitation newMemberInvitation;
     private NotificationMessage notificationMessage;
+    private TaskNotificationMessage taskMessage;
 }
