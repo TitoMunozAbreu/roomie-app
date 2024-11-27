@@ -6,6 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+/**
+ * Represents the statistics of tasks in the system.
+ * This class holds the total number of tasks and the number of completed tasks.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -11,6 +11,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a task in the task management system.
+ * This class encapsulates all the information related to a task,
+ * including its identification, metadata, and current status.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

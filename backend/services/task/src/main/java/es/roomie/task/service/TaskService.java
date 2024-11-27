@@ -21,6 +21,11 @@ import static es.roomie.task.config.enums.Status.Completed;
 import static java.util.Map.of;
 import static org.springframework.http.HttpStatus.OK;
 
+/**
+ * Service class for managing tasks within the application.
+ * This class contains methods to create, update, delete,
+ * and retrieve tasks for a specified household.
+ */
 @Service
 @Transactional
 @AllArgsConstructor
@@ -31,6 +36,13 @@ public class TaskService {
     private final TaskProducer taskProducer;
 
 
+    /**
+     * Retrieves a list of tasks associated with the specified household IDs.
+     *
+     * @param householdIds List of household IDs to filter tasks
+     * @return ResponseEntity containing a list of TaskResponse objects
+     * @throws ResourceNotFoundException if no tasks are found for the given IDs
+     */
     public ResponseEntity<List<TaskResponse>> getTasksByHouseholdIdIn(List<String> householdIds) {
         log.info("Fetch tasks");
         List<Task> tasks = taskRepository.findByHouseholdIdIn(householdIds);
@@ -42,6 +54,12 @@ public class TaskService {
         return new ResponseEntity<>(taskMapper.mapToTasksResponse(tasks), OK);
     }
 
+    /**
+     * Creates a new task based on the provided request data.
+     *
+     * @param taskResquest The request data for creating a task
+     * @return ResponseEntity containing the created TaskResponse object
+     */
     public ResponseEntity<TaskResponse> createTask(TaskResquest taskResquest) {
         Task task = taskMapper.mapToTask(taskResquest);
         incrementTotalTask(task);
@@ -62,6 +80,14 @@ public class TaskService {
         return new ResponseEntity<>(taskMapper.mapToTaskResponse(task), OK);
     }
 
+    /**
+     * Updates an existing task identified by the task ID.
+     *
+     * @param taskId The ID of the task to be updated
+     * @param taskResquest The request data for updating the task
+     * @return ResponseEntity containing the updated TaskResponse object
+     * @throws ResourceNotFoundException if the task is not found
+     */
     public ResponseEntity<TaskResponse> updateTask(String taskId, TaskResquest taskResquest) {
         Task taskFound = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("No task found."));
@@ -88,6 +114,14 @@ public class TaskService {
         return new ResponseEntity<>(taskMapper.mapToTaskResponse(taskFound), OK);
     }
 
+    /**
+     * Updates the status of a task identified by the task ID.
+     *
+     * @param taskId The ID of the task to update the status
+     * @param status The new status to be set for the task
+     * @return ResponseEntity containing the updated status of the task
+     * @throws ResourceNotFoundException if the task is not found
+     */
     public ResponseEntity<?> updateStatus(String taskId, Status status) {
         Task taskFound = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("No task found."));
@@ -117,6 +151,13 @@ public class TaskService {
         return new ResponseEntity<>(of("status", taskFound.getStatus()), OK);
     }
 
+    /**
+     * Deletes a task identified by the task ID.
+     *
+     * @param taskId The ID of the task to be deleted
+     * @return ResponseEntity confirming the deletion of the task
+     * @throws ResourceNotFoundException if the task is not found
+     */
     public ResponseEntity<?> deleteTask(String taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("No task found."));
@@ -137,15 +178,32 @@ public class TaskService {
         return new ResponseEntity<>("Deleted task", OK);
     }
 
+    /**
+     * Increments the total task count for a given task.
+     *
+     * @param task The task for which to increment the total count
+     * @return The updated task object
+     */
     private Task incrementTotalTask(Task task) {
         task.getStatistics().incrementTotalTask();
         return task;
     }
 
+    /**
+     * Increments the completed task count for a given task.
+     *
+     * @param task The task for which to increment the completed count
+     */
     private void incrementCompletedTask(Task task) {
         task.getStatistics().incrementCompletedTasks();
     }
 
+    /**
+     * Deletes all tasks associated with a specified household ID.
+     *
+     * @param householdId The ID of the household whose tasks will be deleted
+     * @return ResponseEntity confirming the deletion of all tasks
+     */
     public ResponseEntity<?> deleteAllTasks(String householdId) {
         log.info("Delete all tasks");
         taskRepository.deleteByHouseholdId(householdId);

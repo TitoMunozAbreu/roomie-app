@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a response model for a task in the system.
+ * This class contains various attributes related to a task.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -18,18 +18,48 @@ import java.util.UUID;
 import static org.mapstruct.NullValueMappingStrategy.RETURN_DEFAULT;
 import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 
+/**
+ * Mapper interface for converting between Task, TaskRequest, and TaskResponse objects.
+ * Utilizes MapStruct for automatic mapping generation.
+ */
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = IGNORE)
 public interface TaskMapper {
 
+    /**
+     * Maps a TaskRequest to a Task.
+     *
+     * @param task the TaskRequest object to be mapped
+     * @return the mapped Task object
+     */
     Task mapToTask(TaskResquest task);
 
+    /**
+     * Maps a Task to a TaskResponse.
+     *
+     * @param task the Task object to be mapped
+     * @return the mapped TaskResponse object
+     */
     TaskResponse mapToTaskResponse(Task task);
 
+    /**
+     * Maps a list of Task objects to a list of TaskResponse objects.
+     *
+     * @param tasks the list of Task objects to be mapped
+     * @return the list of mapped TaskResponse objects
+     */
     @IterableMapping(nullValueMappingStrategy = RETURN_DEFAULT,
                      elementTargetType = TaskMapper.class)
     List<TaskResponse> mapToTasksResponse(List<Task> tasks);
 
+    /**
+     * Updates an existing Task object with values from a TaskRequest.
+     * Only updates fields that are not null and differ from the existing Task values.
+     *
+     * @param taskResquest the TaskRequest object containing updated values
+     * @param taskFound the existing Task object to be updated
+     * @return the updated Task object
+     */
     default Task updateTaskFromRequest(TaskResquest taskResquest, Task taskFound) {
         Optional.ofNullable(taskResquest.householdId())
                 .filter(householdId -> !Objects.equals(householdId, taskFound.getHouseholdId()))
@@ -66,6 +96,13 @@ public interface TaskMapper {
         return taskFound;
     }
 
+    /**
+     * After mapping, sets additional properties on the Task object.
+     * This is executed after the mapping from TaskRequest to Task.
+     *
+     * @param task the Task object that has been mapped
+     * @param taskResquest the TaskRequest object that was used for mapping
+     */
     @AfterMapping()
     default void mapToTask(@MappingTarget Task task, TaskResquest taskResquest) {
         //set UUID
