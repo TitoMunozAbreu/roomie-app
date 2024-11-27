@@ -4,6 +4,8 @@ import es.roomie.task.config.enums.Status;
 import es.roomie.task.model.request.TaskResquest;
 import es.roomie.task.model.response.TaskResponse;
 import es.roomie.task.service.TaskService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,7 +48,8 @@ public class TaskController {
      * @return A ResponseEntity containing the created TaskResponse object.
      */
     @PostMapping
-    public ResponseEntity<TaskResponse> createTask(@RequestBody TaskResquest taskResquest) {
+    public ResponseEntity<TaskResponse> createTask(@RequestBody
+                                                   @Valid TaskResquest taskResquest) {
         return taskService.createTask(taskResquest);
     }
 
@@ -59,7 +62,8 @@ public class TaskController {
      */
     @PutMapping("{taskId}")
     public ResponseEntity<TaskResponse> updateTask(@PathVariable String taskId,
-                                                   @RequestBody TaskResquest taskResquest) {
+                                                   @RequestBody
+                                                   @Valid TaskResquest taskResquest) {
         return taskService.updateTask(taskId, taskResquest);
     }
 
@@ -72,7 +76,7 @@ public class TaskController {
      */
     @PatchMapping("{taskId}/status")
     public ResponseEntity<?> updateStatus(@PathVariable String taskId,
-                                                         @RequestParam("status") Status status) {
+                                         @RequestParam("status") Status status) {
         return taskService.updateStatus(taskId, status);
     }
 

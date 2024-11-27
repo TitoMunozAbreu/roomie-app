@@ -74,6 +74,12 @@ public class GloblalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), BAD_REQUEST);
     }
 
+    /**
+     * Handles MethodArgumentNotValidException thrown when a method argument fails validation.
+     *
+     * @param ex the MethodArgumentNotValidException that was thrown
+     * @return a ResponseEntity containing a map of field error messages and a BAD_REQUEST status
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         HashMap<String, String> errors = new HashMap<>();

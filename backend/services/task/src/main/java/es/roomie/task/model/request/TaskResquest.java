@@ -2,6 +2,7 @@ package es.roomie.task.model.request;
 
 import es.roomie.task.config.enums.Category;
 import es.roomie.task.config.enums.Status;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
 
@@ -21,12 +22,12 @@ import java.time.LocalDateTime;
  * @param status           Current status of the task.
  */
 public record TaskResquest(String taskId,
-                           String householdId,
-                           String createdBy,
-                           String title,
+                           @NotBlank String householdId,
+                           @NotBlank @Email String createdBy,
+                           @NotBlank String title,
                            String description,
                            Category category,
-                           int estimatedDuration,
-                           String assignedTo,
-                           LocalDateTime dueDate,
+                           @Min(1) int estimatedDuration,
+                           @NotBlank @Email String assignedTo,
+                           @FutureOrPresent LocalDateTime dueDate,
                            Status status) {}

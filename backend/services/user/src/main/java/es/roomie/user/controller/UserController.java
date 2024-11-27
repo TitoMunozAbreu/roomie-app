@@ -68,7 +68,8 @@ public class UserController {
      * @return ResponseEntity with status OK
      */
     @PostMapping
-    public ResponseEntity<Void> registerNewUser(@RequestBody UserRequest userRequest) {
+    public ResponseEntity<Void> registerNewUser(@RequestBody
+                                                @Valid UserRequest userRequest) {
         userService.registerNewUser(userRequest);
         return ResponseEntity.ok().build();
     }
@@ -84,8 +85,9 @@ public class UserController {
      */
     @PutMapping("/{userId}/preferences")
     public ResponseEntity<List<TaskPreferenceResponse>> updateUserPreferences(@AuthenticationPrincipal Jwt principal,
-                                                                        @PathVariable String userId,
-                                                                        @Valid @RequestBody List<TaskPreferenceRequest> taskPreferences){
+                                                                              @PathVariable String userId,
+                                                                              @RequestBody
+                                                                              List<TaskPreferenceRequest> taskPreferences){
         if(!principal.getSubject().equals(userId)) {
             throw new UnAuthorizeUserException("You do not have permissions to access this resource.");
         }
@@ -103,8 +105,9 @@ public class UserController {
      */
     @PutMapping("/{userId}/availabilities")
     public ResponseEntity<List<AvailabilityResponse>> updateUserAvailability(@AuthenticationPrincipal Jwt principal,
-                                                                              @PathVariable String userId,
-                                                                              @Valid @RequestBody List<AvailabilityRequest> availabilities){
+                                                                             @PathVariable String userId,
+                                                                             @RequestBody
+                                                                             @Valid List<AvailabilityRequest> availabilities){
         if(!principal.getSubject().equals(userId)) {
             throw new UnAuthorizeUserException("You do not have permissions to access this resource.");
         }
