@@ -2,7 +2,6 @@ package es.roomie.household.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kafka.common.utils.Java;
 
 /**
  * Utility class for JSON processing using Jackson.

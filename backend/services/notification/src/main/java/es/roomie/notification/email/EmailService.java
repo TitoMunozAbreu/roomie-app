@@ -17,6 +17,10 @@ import static es.roomie.notification.email.EmailTemplates.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.mail.javamail.MimeMessageHelper.MULTIPART_MODE_MIXED;
 
+/**
+ * Service class for sending emails using JavaMailSender.
+ * This class provides methods to send various types of emails asynchronously.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -25,6 +29,15 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
+    /**
+     * Sends a new member invitation email.
+     *
+     * @param destinationEmail      The email address of the recipient
+     * @param emailTitle            The title of the email
+     * @param emailDescription      The description of the email
+     * @param urlConfirmInvitation  The confirmation URL for the invitation
+     * @throws MessagingException If there is an error in sending the email
+     */
     @Async
     public void sendNewMemberInvitationEmail(String destinationEmail,
                                              String emailTitle,
@@ -59,6 +72,14 @@ public class EmailService {
         }
     }
 
+    /**
+     * Sends a notification email.
+     *
+     * @param destinationEmail  The email address of the recipient
+     * @param emailTitle        The title of the email
+     * @param emailDescription  The description of the email
+     * @throws MessagingException If there is an error in sending the email
+     */
     @Async
     public void sendNotificationEmail(String destinationEmail,
                                       String emailTitle,
@@ -91,6 +112,16 @@ public class EmailService {
         }
     }
 
+    /**
+     * Sends a task notification email.
+     *
+     * @param destinationEmail  The email address of the recipient
+     * @param emailTitle        The title of the email
+     * @param emailDescription  The description of the email
+     * @param taskName          The name of the task
+     * @param taskDueDate       The due date of the task
+     * @throws MessagingException If there is an error in sending the email
+     */
     @Async
     public void sendTaskNotificationEmail(String destinationEmail,
                                           String emailTitle,

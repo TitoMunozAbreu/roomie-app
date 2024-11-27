@@ -12,6 +12,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
+/**
+ * The Notification class represents a notification entity in the application.
+ * It contains various fields that define the properties of a notification,
+ * including its type, date, and associated messages.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
