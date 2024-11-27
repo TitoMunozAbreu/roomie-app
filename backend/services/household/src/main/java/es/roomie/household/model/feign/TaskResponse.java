@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a response for a task in a household management system.
+ * This class contains information regarding the task such as its ID,
+ * the household it belongs to, who created it, its title, description,
+ * category, estimated duration, assigned user, due date, and its status.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

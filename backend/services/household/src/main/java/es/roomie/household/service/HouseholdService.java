@@ -35,6 +35,10 @@ import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
+/**
+ * Service class responsible for managing household-related operations.
+ * Contains methods for creating, retrieving, updating, and deleting households and their members.
+ */
 @Service
 @AllArgsConstructor
 @Transactional(rollbackFor = {ResourceNotFoundException.class, ForbiddenUserException.class})
@@ -46,7 +50,12 @@ public class HouseholdService {
     private final TaskClient taskClient;
     private final HouseholdProducer householdProducer;
 
-
+    /**
+     * Creates a new household based on the provided request data.
+     *
+     * @param householRequest The request containing the household data.
+     * @return ResponseEntity containing the created HouseholdResponse object.
+     */
     public ResponseEntity<HouseholdResponse> createHousehold(HouseholdRequest householRequest) {
         log.info("Create new household group");
         Household newHousehold = householdMapper.mapToHousehold(householRequest);
@@ -68,6 +77,12 @@ public class HouseholdService {
         return new ResponseEntity<>(householdResponse, CREATED);
     }
 
+    /**
+     * Retrieves all households for a specific member identified by their email.
+     *
+     * @param memberEmail The email of the member whose households to fetch.
+     * @return ResponseEntity containing a list of HouseholdResponse objects.
+     */
     public ResponseEntity<List<HouseholdResponse>> getHouseholds(String memberEmail) {
         log.info("Fetch households");
         List<Household> houseHoldsByMemberUserId = householdRepository.findByMembersEmail(memberEmail);
@@ -85,6 +100,14 @@ public class HouseholdService {
         return new ResponseEntity<>(householdResponses, OK);
     }
 
+    /**
+     * Updates the members of a household identified by its ID.
+     *
+     * @param householdId The ID of the household to update.
+     * @param adminMemberId The ID of the admin member performing the update.
+     * @param memberEmails The list of member emails to update.
+     * @return ResponseEntity containing the updated HouseholdResponse object.
+     */
     public ResponseEntity<HouseholdResponse> updateMembersByHouseholdId(String householdId, String adminMemberId, List<String> memberEmails) {
         log.info("Fetch household");
         Household householdFound = householdRepository.findByIdAndMembersUserIdAndMembersRoleAdmin(householdId, adminMemberId)
@@ -148,6 +171,14 @@ public class HouseholdService {
         return new ResponseEntity<>(householdResponse, OK);
     }
 
+    /**
+     * Updates the name of a household identified by its ID.
+     *
+     * @param householdId The ID of the household to update.
+     * @param userId The ID of the user requesting the update.
+     * @param name The new name for the household.
+     * @return ResponseEntity containing the updated HouseholdNameResponse object.
+     */
     public ResponseEntity<HouseholdNameResponse> updateHouseholdName(String householdId, String userId, String name) {
         Household household = householdRepository.findByIdAndMemberUserId(householdId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found or lacks permissions to access this resource."));
@@ -160,6 +191,14 @@ public class HouseholdService {
 
     }
 
+    /**
+     * Updates the invitation acceptance status of a member for a specific household.
+     *
+     * @param householdId The ID of the household.
+     * @param memberEmail The email of the member to update.
+     * @param invitationAccepted The new invitation status.
+     * @return ResponseEntity containing a message indicating success or failure.
+     */
     public ResponseEntity<?> isMemberInvitationAccepted(String householdId, String memberEmail, boolean invitationAccepted) {
         Household household = householdRepository.findByIdAndMemberEmail(householdId, memberEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found or lacks permissions to access this resource."));
@@ -176,6 +215,14 @@ public class HouseholdService {
         return new ResponseEntity<>(messageResponse, OK);
     }
 
+    /**
+     * Deletes a member from a household.
+     *
+     * @param householdId The ID of the household.
+     * @param adminMemberEmail The email of the admin member requesting the deletion.
+     * @param memberEmail The email of the member to be deleted.
+     * @return ResponseEntity containing the updated HouseholdResponse object.
+     */
     public ResponseEntity<HouseholdResponse> deleteMemberByHouseHold(String householdId, String adminMemberEmail, String memberEmail) {
         Household householdFound = householdRepository.findById(householdId)
                 .orElseThrow(() -> new ResourceNotFoundException("No household found."));
@@ -214,6 +261,13 @@ public class HouseholdService {
         return new ResponseEntity<>(householdResponse, OK);
     }
 
+    /**
+     * Deletes a household by its ID.
+     *
+     * @param householdId The ID of the household to delete.
+     * @param userId The ID of the user requesting the deletion.
+     * @return ResponseEntity containing a message indicating successful deletion.
+     */
     public ResponseEntity<?> deleteHouseholdById(String householdId, String userId) {
         Household householdFound = householdRepository.findById(householdId)
                 .orElseThrow(() -> new ResourceNotFoundException("No household found."));
@@ -244,12 +298,25 @@ public class HouseholdService {
         return new ResponseEntity<>("Deleted household", OK);
     }
 
+    /**
+     * Checks if a member is an admin of the specified household.
+     *
+     * @param adminMemberEmail The email of the member to check.
+     * @param householdFound The household to check against.
+     * @return True if the member is an admin, false otherwise.
+     */
     private static boolean isMemberAdmin(String adminMemberEmail, Household householdFound) {
         return householdFound.getMembers().stream()
                 .anyMatch(member -> member.getEmail().equals(adminMemberEmail) &&
                         member.getRole().equals(admin));
     }
 
+    /**
+     * Retrieves member data for a list of households.
+     *
+     * @param householdResponses The list of household responses to update.
+     * @return Updated list of HouseholdResponse objects.
+     */
     private List<HouseholdResponse> getMembersDataFromHouseholds(List<HouseholdResponse> householdResponses) {
 
         Set<String> membersEmails = householdResponses.stream()
@@ -285,6 +352,12 @@ public class HouseholdService {
         return householdResponses;
     }
 
+    /**
+     * Retrieves member data for a single household.
+     *
+     * @param householdResponse The household response to update.
+     * @return Updated HouseholdResponse object.
+     */
     private HouseholdResponse getMembersDataFromHousehold(HouseholdResponse householdResponse) {
 
         Set<String> membersEmails = householdResponse.getMembers().stream()
@@ -316,6 +389,12 @@ public class HouseholdService {
         return householdResponse;
     }
 
+    /**
+     * Retrieves task data for a list of households based on their IDs.
+     *
+     * @param householdResponses The list of household responses to update with task data.
+     * @return Updated list of HouseholdResponse objects.
+     */
     private List<HouseholdResponse> getTasksDataFromHouseholdIds(List<HouseholdResponse> householdResponses) {
 
         List<String> householdIds = householdResponses.stream()
@@ -343,6 +422,11 @@ public class HouseholdService {
         return householdResponses;
     }
 
+    /**
+     * Deletes tasks related to a specified household.
+     *
+     * @param householdId The ID of the household whose tasks are to be deleted.
+     */
     private void deleteTaskByHouseholdId(String householdId) {
         log.info("Request to task-service to delete task from household");
 

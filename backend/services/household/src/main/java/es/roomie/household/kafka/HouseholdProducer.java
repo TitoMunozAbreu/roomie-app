@@ -10,12 +10,22 @@ import org.springframework.stereotype.Service;
 
 import static org.springframework.kafka.support.KafkaHeaders.TOPIC;
 
+/**
+ * HouseholdProducer is a service that handles the production of messages
+ * related to household events in a Kafka messaging system.
+ * It sends new member invitations and notification messages to specified Kafka topics.
+ */
 @Service
 @AllArgsConstructor
 @Slf4j
 public class HouseholdProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
+    /**
+     * Sends a new member invitation message to the 'newMember-topic'.
+     *
+     * @param newMemberInvitation the invitation details to be sent
+     */
     public void sendNewMemberInvitation(NewMemberInvitation newMemberInvitation) {
         log.info("Sending new member confirmation");
         Message<String> message = MessageBuilder
@@ -26,6 +36,11 @@ public class HouseholdProducer {
         kafkaTemplate.send(message);
     }
 
+    /**
+     * Sends a notification message to the 'notification-topic'.
+     *
+     * @param notificationMessage the notification details to be sent
+     */
     public void sendNotification(NotificationMessage notificationMessage) {
         log.info("Sending notification");
         Message<String> message = MessageBuilder

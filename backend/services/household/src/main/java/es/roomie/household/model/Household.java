@@ -9,6 +9,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
+/**
+ * Represents a household in the system.
+ * This class is used to model a household with a unique identifier,
+ * a name, and a list of members belonging to that household.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

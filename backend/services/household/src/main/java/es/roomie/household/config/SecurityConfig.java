@@ -12,9 +12,20 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Security configuration class for setting up security features
+ * such as CORS and OAuth2 resource server.
+ */
 @Configuration
 public class SecurityConfig {
 
+    /**
+     * Defines a SecurityFilterChain bean that configures HTTP security.
+     *
+     * @param http the HttpSecurity object used to configure security settings
+     * @return a SecurityFilterChain configured for the application
+     * @throws Exception if an error occurs during the configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -27,6 +38,11 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Defines a CorsConfigurationSource bean that configures CORS settings.
+     *
+     * @return a CorsConfigurationSource with specified CORS configurations
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
