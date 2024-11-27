@@ -5,6 +5,7 @@ import Home from "./pages/Home/Home.jsx";
 import Profile from "./pages/Profile/Profile.jsx";
 import Dashboard from "./pages/Dashboard/Dashboard.jsx";
 import Groups from "./pages/Groups/Groups.jsx";
+import AcceptInvitation from "./pages/Invitation/AcceptInvitation.jsx";
 
 const router = createBrowserRouter([
   {
@@ -30,20 +31,16 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/notifications",
-        element: (
-          <PrivateRoute>
-            <h2>notifications</h2>
-          </PrivateRoute>
-        ),
-      },
-      {
         path: "/profile",
         element: (
           <PrivateRoute>
             <Profile />
           </PrivateRoute>
         ),
+      },
+      {
+        path: "/household/:householdId/acceptInvitation",
+        element: <AcceptInvitation />,
       },
     ],
   },

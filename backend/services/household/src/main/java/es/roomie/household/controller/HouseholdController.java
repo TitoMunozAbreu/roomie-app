@@ -62,11 +62,18 @@ public class HouseholdController {
         return householdService.updateHouseholdName(householdId, userId, name);
     }
 
+    @PatchMapping("/{householdId}/member")
+    public ResponseEntity<?> isMemberInvitationAccepted(@AuthenticationPrincipal Jwt principal,
+                                                        @PathVariable String householdId,
+                                                        @RequestParam(value = "invitation-accepted", required = true) boolean invitationAccepted) {
+        String memberEmail = principal.getClaim("email");
+        return householdService.isMemberInvitationAccepted(householdId, memberEmail, invitationAccepted);
+    }
+
     @DeleteMapping("/{householdId}/members/{memberEmail}")
     public ResponseEntity<HouseholdResponse> deleteMemberByHouseholdId(@AuthenticationPrincipal Jwt principal,
                                                                        @PathVariable String householdId,
                                                                        @PathVariable String memberEmail) {
-        String userId = principal.getSubject();
         String adminMemberEmail = principal.getClaim("email");
         tokenService.setToken(principal.getTokenValue());
         return  householdService.deleteMemberByHouseHold(householdId, adminMemberEmail, memberEmail);

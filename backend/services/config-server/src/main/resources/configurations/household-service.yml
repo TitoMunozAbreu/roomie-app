@@ -7,6 +7,14 @@ spring:
       port: 27017
       database: household
       authentication-database: admin
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        spring.json.trusted.packages: '*'
+        spring.json.type.mapping: notificationMessage:es.roomie.household.kafka.NotificationMessage,newMemberInvitation:es.roomie.household.kafka.NewMemberInvitation
 
 server:
   port: 8095

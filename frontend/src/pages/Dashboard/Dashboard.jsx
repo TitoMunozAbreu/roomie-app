@@ -208,7 +208,7 @@ const Dashboard = () => {
     <>
       {notification?.type && <Notification />}
       <h2 style={{ textAlign: "start" }}>Households</h2>
-      {errorMessage && households.length === 0 && <span>{errorMessage}</span>}
+      {errorMessage && households?.length === 0 && <span>{errorMessage}</span>}
       {households && (
         <div>
           <Row gutter={16}>

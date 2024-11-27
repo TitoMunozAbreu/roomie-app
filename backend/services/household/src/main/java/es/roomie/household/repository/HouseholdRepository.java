@@ -19,4 +19,7 @@ public interface HouseholdRepository extends MongoRepository<Household, String> 
 
     @Query("{ '_id':  ?0, 'members': { '$elemMatch' :  { 'userId': ?1 } } }")
     Optional<Household> findByIdAndMemberUserId(String householdId, String userId);
+
+    @Query("{'_id': ?0, 'members':  { '$elemMatch':  { 'email':  ?1} } }")
+    Optional<Household> findByIdAndMemberEmail(String householdId, String memberEmail);
 }

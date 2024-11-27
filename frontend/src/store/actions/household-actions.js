@@ -6,7 +6,7 @@ export const getHouseholds = () => {
   return async (dispatch) => {
     const fetchHouseholds = async () => {
       return await householdService.getHouseholds();
-    }
+    };
 
     fetchHouseholds()
       .then(function (response) {
@@ -16,8 +16,8 @@ export const getHouseholds = () => {
       .catch(function (error) {
         dispatch(uiActions.updateErrorMessage(error.response.data));
       });
-  }
-}
+  };
+};
 
 export const createHousehold = (householdName, userId, email) => {
   return async (dispatch) => {
@@ -109,6 +109,22 @@ export const deleteHousehold = (householdId) => {
     deleteHouseholdById()
       .then(function (response) {
         dispatch(householdActions.deleteHouseholdById(householdId));
+        handleNotification(response.data, dispatch);
+      })
+      .catch(function (error) {
+        handleErrorResponse(error, dispatch);
+      });
+  };
+};
+
+export const memberInvitation = (householdId, isAccepted) => {
+  return async (dispatch) => {
+    const memberInvitation = async () => {
+      return await householdService.memberInvitation(householdId, isAccepted);
+    };
+
+    memberInvitation()
+      .then(function (response) {
         handleNotification(response.data, dispatch);
       })
       .catch(function (error) {

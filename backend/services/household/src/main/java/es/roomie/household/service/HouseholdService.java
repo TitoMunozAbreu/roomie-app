@@ -2,6 +2,9 @@ package es.roomie.household.service;
 
 import es.roomie.household.exceptions.ForbiddenUserException;
 import es.roomie.household.exceptions.ResourceNotFoundException;
+import es.roomie.household.kafka.HouseholdProducer;
+import es.roomie.household.kafka.NewMemberInvitation;
+import es.roomie.household.kafka.NotificationMessage;
 import es.roomie.household.mapper.HouseholdMapper;
 import es.roomie.household.model.Household;
 import es.roomie.household.model.Member;
@@ -16,6 +19,7 @@ import es.roomie.household.service.client.feign.TaskClient;
 import es.roomie.household.service.client.feign.UserClient;
 import feign.FeignException;
 import feign.RetryableException;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -32,6 +36,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @Service
+@AllArgsConstructor
 @Transactional(rollbackFor = {ResourceNotFoundException.class, ForbiddenUserException.class})
 @Slf4j
 public class HouseholdService {
@@ -39,13 +44,8 @@ public class HouseholdService {
     private final HouseholdRepository householdRepository;
     private final UserClient userClient;
     private final TaskClient taskClient;
+    private final HouseholdProducer householdProducer;
 
-    public HouseholdService(HouseholdMapper householdMapper, HouseholdRepository householdRepository, UserClient userClient, TaskClient taskClient) {
-        this.householdMapper = householdMapper;
-        this.householdRepository = householdRepository;
-        this.userClient = userClient;
-        this.taskClient = taskClient;
-    }
 
     public ResponseEntity<HouseholdResponse> createHousehold(HouseholdRequest householRequest) {
         log.info("Create new household group");
@@ -53,8 +53,13 @@ public class HouseholdService {
 
         householdRepository.insert(newHousehold);
 
-        //TODO: send message to notification-service "new home created"
-        log.info("Sent notification to user...");
+        householdProducer.sendNotification(
+                new NotificationMessage(
+                        "New household created",
+                        String.format("Congratulations! '%s' has been added to your household list.",
+                                newHousehold.getHouseholdName()),
+                        householRequest.email())
+        );
 
         HouseholdResponse householdResponse = householdMapper.mapToHouseHoldResponse(newHousehold);
 
@@ -112,9 +117,33 @@ public class HouseholdService {
 
         getMembersDataFromHousehold(householdResponse);
 
-        //TODO: send message to notification-service "Accept Invitation to a household"
-        //TODO: send message to notification-service "deleted from household"
-        log.info("Sent notification to users...");
+        //Send notification to each member added
+        newMembers.forEach(
+                newMember -> {
+                    householdProducer.sendNewMemberInvitation(
+                            new NewMemberInvitation(
+                                    "Welcome to the household",
+                                    String.format("You have been added to the household '%s'.",
+                                            householdFound.getHouseholdName()),
+                                    newMember.getEmail(),
+                                    String.format("http://localhost:5173/household/%s/acceptInvitation", householdFound.getId()))
+                    );
+                    log.info("Sent notification to member {}", newMember.getEmail());
+                }
+        );
+        //Send notification to each member removed
+        removedMembers.forEach(
+                removedMember -> {
+                    householdProducer.sendNotification(
+                            new NotificationMessage(
+                                    "Removed from household",
+                                    String.format("You have been removed from the household '%s'.",
+                                            householdFound.getHouseholdName()),
+                                    removedMember.getEmail())
+                    );
+                    log.info("Sent notification to member {}", removedMember.getEmail());
+                }
+        );
 
         return new ResponseEntity<>(householdResponse, OK);
     }
@@ -129,6 +158,22 @@ public class HouseholdService {
 
         return new ResponseEntity<>(householdMapper.mapToHouseholdNameResponse(household), OK);
 
+    }
+
+    public ResponseEntity<?> isMemberInvitationAccepted(String householdId, String memberEmail, boolean invitationAccepted) {
+        Household household = householdRepository.findByIdAndMemberEmail(householdId, memberEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found or lacks permissions to access this resource."));
+
+        log.info("updating member invitation: {}", memberEmail);
+        household.getMembers().stream()
+                .filter(member -> member.getEmail().equals(memberEmail))
+                .forEach(member -> member.setInvitationAccepted(invitationAccepted));
+
+        householdRepository.save(household);
+
+        String messageResponse = invitationAccepted ? "Invitation updated successfully." : "Invitation rejected.";
+
+        return new ResponseEntity<>(messageResponse, OK);
     }
 
     public ResponseEntity<HouseholdResponse> deleteMemberByHouseHold(String householdId, String adminMemberEmail, String memberEmail) {
@@ -154,6 +199,14 @@ public class HouseholdService {
 
         householdRepository.save(householdFound);
 
+        householdProducer.sendNotification(
+                new NotificationMessage(
+                        "Removed from household",
+                        String.format("You have been removed from the household '%s'.",
+                                householdFound.getHouseholdName()),
+                        memberEmail)
+        );
+
         HouseholdResponse householdResponse = householdMapper.mapToHouseHoldResponse(householdFound);
 
         getMembersDataFromHousehold(householdResponse);
@@ -171,12 +224,22 @@ public class HouseholdService {
             throw new ResourceNotFoundException("Member not found or lacks permissions to access this resource.");
         }
 
+        //delete task related to householdFound
+        deleteTaskByHouseholdId(householdFound.getId());
+
         householdRepository.delete(householdFound);
 
-        //TODO: send request to task-service: "deleteTasksByHouseholdId"
-        log.info("Sent request to task-service...");
-        //TODO: send message to notification-service "deleted household"
-        log.info("Sent notification to user...");
+        householdFound.getMembers().forEach(
+                member -> {
+                    householdProducer.sendNotification(
+                            new NotificationMessage(
+                                    "Household Removed",
+                                    String.format("We regret to inform you that the household '%s' has been deleted. You are no longer a member of this household.",
+                                            householdFound.getHouseholdName()),
+                                    member.getEmail())
+                    );
+                }
+        );
 
         return new ResponseEntity<>("Deleted household", OK);
     }
@@ -280,4 +343,14 @@ public class HouseholdService {
         return householdResponses;
     }
 
+    private void deleteTaskByHouseholdId(String householdId) {
+        log.info("Request to task-service to delete task from household");
+
+        try {
+            taskClient.deleteTaskByHouseholdId(householdId);
+
+        } catch (FeignException e) {
+            log.warn(e.getMessage());
+        }
+    }
 }

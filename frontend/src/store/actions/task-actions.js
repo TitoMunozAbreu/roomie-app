@@ -91,6 +91,8 @@ export const updateStatus = (householdId, taskId, status) => {
 };
 
 const handleErrorResponse = (error, dispatch) => {
+  console.log(error);
+  
   const errorMessage =
     error.response && error.response.data
       ? error.response.data

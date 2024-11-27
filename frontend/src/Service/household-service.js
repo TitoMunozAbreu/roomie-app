@@ -58,6 +58,18 @@ const deleteHousehold = async (householdId) => {
   );
 };
 
+const memberInvitation = async (householdId, isAccepted) => {
+  const userToken = localStorage.getItem("token");
+  return await instance.patch(
+    `${ENDPOINTS.HOUSEHOLD.URL}${ENDPOINTS.HOUSEHOLD.URI}/${householdId}/member`,
+    {},
+    {
+      headers: { Authorization: `Bearer ${userToken}` },
+      params: { "invitation-accepted": isAccepted },
+    }
+  );
+};
+
 export const householdService = {
   createHousehold,
   getHouseholds,
@@ -65,4 +77,5 @@ export const householdService = {
   deleteHouseholdMember,
   updateHouseholdMembers,
   deleteHousehold,
+  memberInvitation,
 };

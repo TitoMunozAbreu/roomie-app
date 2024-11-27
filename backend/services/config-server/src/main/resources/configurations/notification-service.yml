@@ -1,0 +1,36 @@
+spring:
+  data:
+    mongodb:
+      username: roomie
+      password: roomie
+      host: localhost
+      port: 27017
+      database: notification
+      authentication-database: admin
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: newMemberGroup,notificationGroup,taskGroup
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+        spring.json.type.mapping: notificationMessage:es.roomie.notification.kafka.household.NotificationMessage,newMemberInvitation:es.roomie.notification.kafka.household.NewMemberInvitation
+  mail:
+    host: localhost
+    port: 1025
+    username: roomie
+    password: roomie
+    properties:
+      mail:
+        smtp:
+          trust: "*"
+        auth: true
+        starttls:
+          enabled: true
+        connectiontimeout: 5000
+        timeout: 3000
+        writetimeout: 5000
+server:
+  port: 8040
