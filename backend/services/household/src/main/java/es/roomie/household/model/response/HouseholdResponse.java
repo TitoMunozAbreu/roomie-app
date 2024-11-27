@@ -8,6 +8,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Represents a response model for household information.
+ * This class contains details about a household, including
+ * its ID, name, members, and tasks associated with it.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

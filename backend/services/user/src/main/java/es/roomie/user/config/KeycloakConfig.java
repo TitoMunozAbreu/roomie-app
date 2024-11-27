@@ -7,6 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration class for Keycloak integration.
+ * This class is responsible for creating a Keycloak client
+ * using the provided configuration properties.
+ */
 @Configuration
 public class KeycloakConfig {
     @Value("${keycloak.adminClientId}")
@@ -21,6 +26,12 @@ public class KeycloakConfig {
     @Value("${keycloak.realm}")
     private String realm;
 
+    /**
+     * Creates a Keycloak client bean.
+     *
+     * @return a Keycloak instance configured with the specified server URL, realm,
+     *         client ID, and client secret.
+     */
     @Bean
     public Keycloak keycloak(){
         return KeycloakBuilder.builder()

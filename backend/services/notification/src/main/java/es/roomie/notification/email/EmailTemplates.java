@@ -2,6 +2,10 @@ package es.roomie.notification.email;
 
 import lombok.Getter;
 
+/**
+ * Enum representing various email templates used in the application.
+ * Each enum constant corresponds to a specific email template with its associated subject.
+ */
 @Getter
 public enum EmailTemplates {
     NEW_MEMBER_CONFIRMATION("new-member-invitation.html", "Welcome to the household"),

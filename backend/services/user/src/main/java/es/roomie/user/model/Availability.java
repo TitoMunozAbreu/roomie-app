@@ -7,6 +7,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Represents the availability of a user for a specific day.
+ * This class contains the day and the corresponding hours
+ * when the user is available.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

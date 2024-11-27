@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+
+/**
+ * The UserResponse class is a data transfer object (DTO) that encapsulates
+ * user information to be sent in responses.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

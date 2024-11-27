@@ -6,6 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents the response model for a household member.
+ * This class contains the details of a member within a household.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -15,6 +15,10 @@ import java.util.List;
 
 import static org.springframework.http.HttpMethod.POST;
 
+/**
+ * Security configuration class for setting up security features
+ * such as CORS and OAuth2 resource server.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -22,12 +26,25 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
+    /**
+     * Constructor for SecurityConfig.
+     *
+     * @param authenticationEntryPoint the entry point to use for authentication errors
+     * @param accessDeniedHandler the handler to use for access denied errors
+     */
     public SecurityConfig(CustomAuthenticationEntryPoint authenticationEntryPoint,
                           CustomAccessDeniedHandler accessDeniedHandler) {
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
     }
 
+    /**
+     * Defines a SecurityFilterChain bean that configures HTTP security.
+     *
+     * @param http the HttpSecurity object used to configure security settings
+     * @return a SecurityFilterChain configured for the application
+     * @throws Exception if an error occurs during the configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -44,6 +61,11 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Defines a CorsConfigurationSource bean that configures CORS settings.
+     *
+     * @return a CorsConfigurationSource with specified CORS configurations
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
