@@ -8,11 +8,27 @@ import org.mapstruct.NullValueMappingStrategy;
 
 import java.util.List;
 
+/**
+ * Mapper interface for converting TaskHistory objects to TaskHistoryResponse objects.
+ * Utilizes MapStruct for automatic mapping generation.
+ */
 @Mapper(componentModel = "spring")
 public interface TaskHistoryMapper {
 
+    /**
+     * Maps a single TaskHistory object to a TaskHistoryResponse object.
+     *
+     * @param taskHistory the TaskHistory object to be mapped
+     * @return the mapped TaskHistoryResponse object
+     */
     TaskHistoryResponse mapTaskHistoryResponse(TaskHistory taskHistory);
 
+    /**
+     * Maps a list of TaskHistory objects to a list of TaskHistoryResponse objects.
+     *
+     * @param taskHistory the list of TaskHistory objects to be mapped
+     * @return the list of mapped TaskHistoryResponse objects
+     */
     @IterableMapping(
             elementTargetType = TaskHistoryResponse.class,
             nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT

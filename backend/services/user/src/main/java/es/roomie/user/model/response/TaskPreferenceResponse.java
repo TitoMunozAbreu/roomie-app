@@ -5,6 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * A Data Transfer Object (DTO) for task preferences response.
+ * It contains the name of the task and the user's preference
+ * regarding that task.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
