@@ -61,6 +61,10 @@ export default function AppHeader() {
 
   const MENU_AUTH = [
     {
+      key: "home",
+      label: "Home",
+    },
+    {
       key: "dashboard",
       label: "Dashboard",
       icon: <DashboardOutlined />,
@@ -92,6 +96,9 @@ export default function AppHeader() {
 
   const handleMenuClick = (selected) => {
     switch (selected.key) {
+      case "home":
+        navigate("/home");
+        break;
       case "login":
         keycloak.login({ redirectUri: "http://localhost:5173/dashboard" });
         break;

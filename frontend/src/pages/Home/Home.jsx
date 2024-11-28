@@ -5,10 +5,12 @@ import { FEATURES } from "./fetures";
 import { useKeycloak } from "@react-keycloak/web";
 import cleanHouse from "../../assets/images/clean-house.jpg";
 import styles from "./Home.module.css";
+import { useSelector } from "react-redux";
 
 export default function Home() {
-  const { keycloak } = useKeycloak();
+  const isDarkMode = useSelector((state) => state.ui.isDarkMode);
 
+  const { keycloak } = useKeycloak();
   const handleSignIn = () => {
     keycloak.login({ redirectUri: "http://localhost:5173/dashboard" });
   };
@@ -19,7 +21,7 @@ export default function Home() {
     </Button>
   );
 
-  if(keycloak.authenticated){
+  if (keycloak.authenticated) {
     btnSignIn = <></>;
   }
 
@@ -57,10 +59,22 @@ export default function Home() {
           {FEATURES.map(({ key, title, description, image }) => (
             <Col xs={24} md={8} key={key}>
               <Card
-              className={styles.customCard}
+                className={styles.customCard}
                 hoverable
                 cover={
-                  <img className={styles.featureImage} alt={title} src={image} />
+                  <img
+                    className={styles.featureImage}
+                    alt={title}
+                    src={image}
+                    style={
+                      isDarkMode
+                        ? {
+                            filter: "brightness(0.8) contrast(0.9)",
+                            "mix-blend-mode": "difference",
+                          }
+                        : {}
+                    }
+                  />
                 }
               >
                 <Card.Meta title={title} description={description} />
