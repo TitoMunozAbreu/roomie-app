@@ -13,11 +13,17 @@ import {
   DashboardOutlined,
   MessageOutlined,
   SettingOutlined,
+  MoonOutlined,
+  SunOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
+import { uiActions } from "../../../store/reducers/ui-slice";
+import { icons } from "antd/es/image/PreviewGroup";
 
 const { Header } = Layout;
 
 export default function AppHeader() {
+  const isDarkMode = useSelector((state) => state.ui.isDarkMode);
   const { keycloak, initialized } = useKeycloak();
   const user = useSelector((state) => state.user.user);
   const currentUri = useLocation();
@@ -60,9 +66,9 @@ export default function AppHeader() {
       icon: <DashboardOutlined />,
     },
     {
-      key: "groups",
-      label: "Groups",
-      icon: <SettingOutlined />,
+      key: "households",
+      label: "Households",
+      icon: <HomeOutlined />,
     },
     {
       key: "user",
@@ -74,6 +80,11 @@ export default function AppHeader() {
       icon: <UserOutlined />,
       children: [
         { key: "profile", label: "Profile", icon: <ProfileOutlined /> },
+        {
+          key: isDarkMode ? "dark" : "light",
+          label: isDarkMode ? "Light" : "Dark",
+          icon: isDarkMode ? <MoonOutlined /> : <SunOutlined />,
+        },
         { key: "logout", label: "Logout", icon: <LogoutOutlined /> },
       ],
     },
@@ -91,14 +102,20 @@ export default function AppHeader() {
       case "dashboard":
         navigate("/dashboard");
         break;
-      case "groups":
-        navigate("/groups");
+      case "households":
+        navigate("/households");
         break;
       case "notifications":
         navigate("/notifications");
         break;
       case "profile":
         navigate("/profile");
+        break;
+      case "light":
+        dispatch(uiActions.toggleDarkMode());
+        break;
+      case "dark":
+        dispatch(uiActions.toggleDarkMode());
         break;
       default:
         navigate("/");

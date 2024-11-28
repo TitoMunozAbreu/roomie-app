@@ -4,10 +4,14 @@ import { ReactKeycloakProvider } from "@react-keycloak/web";
 import keycloakInst from "./keycloak.js";
 import { RouterProvider } from "react-router-dom";
 import router from "./routes.jsx";
+import { ConfigProvider, theme } from "antd";
+import { useSelector } from "react-redux";
 
 const initOptions = { onLoad: "check-sso" };
+const { defaultAlgorithm, darkAlgorithm } = theme;
 
 function App() {
+  const isDarkMode = useSelector((state) => state.ui.isDarkMode);
   const handleKeycloakTokens = (tokens) => {
     localStorage.setItem("token", tokens.token);
     localStorage.setItem("refreshToken", tokens.refreshToken);
@@ -38,7 +42,9 @@ function App() {
       initOptions={initOptions}
       onTokens={handleKeycloakTokens}
     >
-      <RouterProvider router={router} />
+      <ConfigProvider theme={{ algorithm: isDarkMode ? darkAlgorithm: defaultAlgorithm }}>
+        <RouterProvider router={router} />
+      </ConfigProvider>
     </ReactKeycloakProvider>
   );
 }

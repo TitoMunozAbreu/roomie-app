@@ -29,6 +29,7 @@ export default function Home() {
       <section className={styles.introSection}>
         <Row gutter={16} align="middle">
           <Col xs={24} md={12}>
+            <h1>ROOMIE</h1>
             <h1>Manage Your Household Tasks</h1>
             <p>
               Organize and assign tasks easily to save time and simplify your

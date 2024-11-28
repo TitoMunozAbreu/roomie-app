@@ -23,7 +23,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/groups",
+        path: "/households",
         element: (
           <PrivateRoute>
             <Groups />

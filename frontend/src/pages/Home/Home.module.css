@@ -10,7 +10,7 @@
   .introImage {
     width: 100%;
     height: auto;
-
+    filter: brightness(0.8) contrast(0.9);
   }
   
   .featuresSection {
@@ -29,5 +29,7 @@
     width: 50%;
     display: -webkit-inline-box;
     padding-top: 2%;
+    filter: brightness(0.8) contrast(0.9);
+    mix-blend-mode: difference;
   }
   
