@@ -5,11 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import java.util.HashMap;
+
+import static org.springframework.http.HttpStatus.*;
 
 /**
  * GlobalExceptionHandler is a REST controller advice that handles exceptions thrown
@@ -51,5 +54,24 @@ public class GloblalExceptionHandler {
     @ExceptionHandler(UnAuthorizeUserException.class)
     public ResponseEntity<?> handleUnAuthorizeUserException(UnAuthorizeUserException ex) {
         return new ResponseEntity<>(ex.getMessage(), UNAUTHORIZED);
+    }
+
+    /**
+     * Handles MethodArgumentNotValidException thrown when a method argument fails validation.
+     *
+     * @param ex the MethodArgumentNotValidException that was thrown
+     * @return a ResponseEntity containing a map of field error messages and a BAD_REQUEST status
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        HashMap<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult().getAllErrors()
+                .forEach(error -> {
+                    String fieldName = ((FieldError) error).getField();
+                    String errorMessage = error.getDefaultMessage();
+                    errors.put(fieldName, errorMessage);
+                });
+        return new ResponseEntity<>(errors, BAD_REQUEST);
     }
 }

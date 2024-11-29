@@ -1,5 +1,7 @@
 package es.roomie.user.model.request;
 
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.List;
 
 /**
@@ -7,6 +9,6 @@ import java.util.List;
  * This record holds information about a specific day and the hours available on that day.
  */
 public record AvailabilityRequest (
-        String day,
-        List<String> hours
+        @NotBlank String day,
+        @NotBlank List<String> hours
 ){}

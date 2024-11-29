@@ -112,7 +112,8 @@ public class HouseholdController {
     @PatchMapping("/{householdId}/member")
     public ResponseEntity<?> isMemberInvitationAccepted(@AuthenticationPrincipal Jwt principal,
                                                         @PathVariable String householdId,
-                                                        @RequestParam(value = "invitation-accepted", required = true) boolean invitationAccepted) {
+                                                        @RequestParam(value = "invitation-accepted", required = true)
+                                                            boolean invitationAccepted) {
         String memberEmail = principal.getClaim("email");
         return householdService.isMemberInvitationAccepted(householdId, memberEmail, invitationAccepted);
     }

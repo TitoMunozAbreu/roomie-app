@@ -1,5 +1,8 @@
 package es.roomie.household.model.resquest;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 /**
  * A record that represents a request to create or update a household.
  * This class encapsulates the details necessary for identifying a household
@@ -9,4 +12,6 @@ package es.roomie.household.model.resquest;
  * @param userId the unique identifier of the user associated with the household
  * @param email the email address of the user associated with the household
  */
-public record HouseholdRequest(String householdName, String userId, String email) {}
+public record HouseholdRequest(@NotBlank String householdName,
+                               @NotBlank String userId,
+                               @NotBlank @Email String email) {}

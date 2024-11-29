@@ -7,8 +7,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.util.List;
+import java.util.Locale;
 
 @SpringBootApplication
 public class UserApplication {
@@ -17,19 +21,31 @@ public class UserApplication {
 		SpringApplication.run(UserApplication.class, args);
 	}
 
+	/**
+	 * Bean definition for localeResolver.
+	 * This method configures the locale resolver to use session-based locale management.
+	 *
+	 * @return A LocaleResolver configured for session management with a default locale
+	 */
 	@Bean
-	public CommandLineRunner demo(UserRepository userRepository) {
-		return args -> {
-			boolean isUser = userRepository
-					.findById("f3f42941-99e2-43a7-a80e-871339a57f13")
-					.isPresent();
+	public LocaleResolver localeResolver() {
+		SessionLocaleResolver localeResolver = new SessionLocaleResolver();
+		localeResolver.setDefaultLocale(Locale.ENGLISH); // change this
+		return localeResolver;
+	}
 
-			if(!isUser){
-				User newUser = User.builder()
-						.id("f3f42941-99e2-43a7-a80e-871339a57f13")
-						.build();
-				userRepository.insert(newUser);
-			}
-		};
+	/**
+	 * Bean definition for messageSource.
+	 * This method sets up a message source for internationalization,
+	 * loading messages from a resource bundle.
+	 *
+	 * @return A ResourceBundleMessageSource configured with the specified basename and encoding
+	 */
+	@Bean
+	public ResourceBundleMessageSource messageSource() {
+		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+		messageSource.setBasename("ValidationMessages");
+		messageSource.setDefaultEncoding("UTF-8");
+		return messageSource;
 	}
 }
