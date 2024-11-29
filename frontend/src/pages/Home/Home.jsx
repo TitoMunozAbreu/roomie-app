@@ -1,14 +1,20 @@
 import React from "react";
-import { Row, Col, Button, Card } from "antd";
+import { Row, Col, Button, Card, Typography } from "antd";
 import { Divider } from "antd";
 import { FEATURES } from "./fetures";
 import { useKeycloak } from "@react-keycloak/web";
 import cleanHouse from "../../assets/images/clean-house.jpg";
 import styles from "./Home.module.css";
+import { useSelector } from "react-redux";
+import logo from "../../assets/images/logo.png";
+
+
+const { Title } = Typography;
 
 export default function Home() {
-  const { keycloak } = useKeycloak();
+  const isDarkMode = useSelector((state) => state.ui.isDarkMode);
 
+  const { keycloak } = useKeycloak();
   const handleSignIn = () => {
     keycloak.login({ redirectUri: "http://localhost:5173/dashboard" });
   };
@@ -19,7 +25,7 @@ export default function Home() {
     </Button>
   );
 
-  if(keycloak.authenticated){
+  if (keycloak.authenticated) {
     btnSignIn = <></>;
   }
 
@@ -29,6 +35,13 @@ export default function Home() {
       <section className={styles.introSection}>
         <Row gutter={16} align="middle">
           <Col xs={24} md={12}>
+            <img
+              style={{ width: 140, alignItems: "center", marginLeft: "80px" }}
+              src={logo}
+            ></img>
+            <Title id={isDarkMode ? styles.titleDarkMode : styles.title}>
+              ROOMIE
+            </Title>
             <h1>Manage Your Household Tasks</h1>
             <p>
               Organize and assign tasks easily to save time and simplify your
@@ -56,10 +69,22 @@ export default function Home() {
           {FEATURES.map(({ key, title, description, image }) => (
             <Col xs={24} md={8} key={key}>
               <Card
-              className={styles.customCard}
+                className={styles.customCard}
                 hoverable
                 cover={
-                  <img className={styles.featureImage} alt={title} src={image} />
+                  <img
+                    className={styles.featureImage}
+                    alt={title}
+                    src={image}
+                    style={
+                      isDarkMode
+                        ? {
+                            filter: "brightness(0.8) contrast(0.9)",
+                            "mix-blend-mode": "difference",
+                          }
+                        : {}
+                    }
+                  />
                 }
               >
                 <Card.Meta title={title} description={description} />

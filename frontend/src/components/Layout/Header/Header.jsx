@@ -1,5 +1,5 @@
 import "./Header.css";
-import logo from "../../../assets/images/logo.jpg";
+import logo from "../../../assets/images/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "../../../store/reducers/user-slice";
 import { Layout, Menu } from "antd";
@@ -13,11 +13,17 @@ import {
   DashboardOutlined,
   MessageOutlined,
   SettingOutlined,
+  MoonOutlined,
+  SunOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
+import { uiActions } from "../../../store/reducers/ui-slice";
+import { icons } from "antd/es/image/PreviewGroup";
 
 const { Header } = Layout;
 
 export default function AppHeader() {
+  const isDarkMode = useSelector((state) => state.ui.isDarkMode);
   const { keycloak, initialized } = useKeycloak();
   const user = useSelector((state) => state.user.user);
   const currentUri = useLocation();
@@ -55,14 +61,18 @@ export default function AppHeader() {
 
   const MENU_AUTH = [
     {
+      key: "home",
+      label: "Home",
+    },
+    {
       key: "dashboard",
       label: "Dashboard",
       icon: <DashboardOutlined />,
     },
     {
-      key: "groups",
-      label: "Groups",
-      icon: <SettingOutlined />,
+      key: "households",
+      label: "Households",
+      icon: <HomeOutlined />,
     },
     {
       key: "user",
@@ -74,6 +84,11 @@ export default function AppHeader() {
       icon: <UserOutlined />,
       children: [
         { key: "profile", label: "Profile", icon: <ProfileOutlined /> },
+        {
+          key: isDarkMode ? "dark" : "light",
+          label: isDarkMode ? "Light" : "Dark",
+          icon: isDarkMode ? <MoonOutlined /> : <SunOutlined />,
+        },
         { key: "logout", label: "Logout", icon: <LogoutOutlined /> },
       ],
     },
@@ -81,6 +96,9 @@ export default function AppHeader() {
 
   const handleMenuClick = (selected) => {
     switch (selected.key) {
+      case "home":
+        navigate("/home");
+        break;
       case "login":
         keycloak.login({ redirectUri: "http://localhost:5173/dashboard" });
         break;
@@ -91,14 +109,20 @@ export default function AppHeader() {
       case "dashboard":
         navigate("/dashboard");
         break;
-      case "groups":
-        navigate("/groups");
+      case "households":
+        navigate("/households");
         break;
       case "notifications":
         navigate("/notifications");
         break;
       case "profile":
         navigate("/profile");
+        break;
+      case "light":
+        dispatch(uiActions.toggleDarkMode());
+        break;
+      case "dark":
+        dispatch(uiActions.toggleDarkMode());
         break;
       default:
         navigate("/");

@@ -13,6 +13,7 @@ import {
   Row,
   Col,
   Select,
+  Spin,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -44,6 +45,7 @@ const taskStates = [
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const isLoading = useSelector((state) => state.ui.profile.isLoading);
   const households = useSelector((state) => state.households.households);
   const selectedHousehold = useSelector(
     (state) => state.households.selectedHousehold
@@ -57,6 +59,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (households === null || households.length === 0) {
+      dispatch(uiActions.showLoading());
       dispatch(getHouseholds());
     }
   }, [errorMessage, selectedHousehold, dispatch]);
@@ -204,12 +207,20 @@ const Dashboard = () => {
     dispatch(deleteTask(selectedHousehold.id, taskId));
   };
 
+  const showLoading = (
+    <Spin
+      size="large"
+      style={{ display: "flex", justifyContent: "center", marginTop: "10%" }}
+    />
+  );
+
   return (
     <>
-      {notification?.type && <Notification />}
       <h2 style={{ textAlign: "start" }}>Households</h2>
-      {errorMessage && households?.length === 0 && <span>{errorMessage}</span>}
-      {households && (
+      {isLoading && showLoading}
+      {notification?.type && <Notification />}
+      {errorMessage && <span>{errorMessage}</span>}
+      {households?.length > 0 && (
         <div>
           <Row gutter={16}>
             <Col span={6}>
@@ -280,17 +291,40 @@ const Dashboard = () => {
                       <List.Item.Meta
                         title={task.title}
                         description={
-                          <div
-                            onClick={() => onClickStatus(task.id)}
-                            style={{ cursor: "pointer" }}
-                          >
-                            {renderTaskStateBadge(
-                              task.status,
-                              editTaskStatus === task.id, // Comparar ID para editar solo esa tarea
-                              (newStatus) =>
-                                handleEditStatus(task.id, newStatus) // Pasar la función para actualizar
-                            )}
-                          </div>
+                          <>
+                            <Row gutter={16}>
+                              <Col span={8} style={{paddingBottom:10}}>
+                                <span>{task.description}</span>
+                              </Col>
+                              <Col span={3}>
+                                <span>assigned to</span>
+                              </Col>
+                              <Col >
+                                <span><b>{task.assignedTo}</b></span>
+                              </Col>
+                            </Row>
+                            <Row gutter={16}>
+                              <Col span={8}>
+                                <div
+                                  onClick={() => onClickStatus(task.id)}
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {renderTaskStateBadge(
+                                    task.status,
+                                    editTaskStatus === task.id, // Comparar ID para editar solo esa tarea
+                                    (newStatus) =>
+                                      handleEditStatus(task.id, newStatus) // Pasar la función para actualizar
+                                  )}
+                                </div>
+                              </Col>
+                              <Col span={3}>
+                                  <span>Due</span>
+                              </Col>
+                              <Col>
+                                  <span><b>{task.dueDate}</b></span>
+                              </Col>
+                            </Row>
+                          </>
                         }
                       />
                     </List.Item>

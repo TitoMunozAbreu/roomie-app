@@ -10,5 +10,5 @@ import java.util.List;
  */
 public record AvailabilityRequest (
         @NotBlank String day,
-        @NotBlank List<String> hours
+        List<String> hours
 ){}

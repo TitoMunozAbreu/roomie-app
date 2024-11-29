@@ -15,6 +15,7 @@ const initialState = {
   notification: null,
   errorMessage: null,
   submitForm: false,
+  isDarkMode: true
 };
 
 const uiSlice = createSlice({
@@ -58,6 +59,9 @@ const uiSlice = createSlice({
     resetFormSubmit(state) {
       state.submitForm = false;
     },
+    toggleDarkMode(state){
+      state.isDarkMode = !state.isDarkMode;
+    }
   },
 });
 

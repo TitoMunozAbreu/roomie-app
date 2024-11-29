@@ -62,6 +62,7 @@ const Groups = () => {
     useState(false);
 
   useEffect(() => {
+    dispatch(uiActions.showLoading());
     dispatch(getHouseholds());
   }, [errorMessage, dispatch]);
 
@@ -358,7 +359,7 @@ const Groups = () => {
                         }
                         description={member.email}
                       />
-                      {user.email !== member.email && (
+                      {member.role !== "admin" && (
                         <div>
                           {/* Delete member */}
                           <Button

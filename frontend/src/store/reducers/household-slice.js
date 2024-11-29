@@ -67,7 +67,7 @@ const householdSlice = createSlice({
         (h) => h.id === action.payload.householdId
       );
       
-      if (household.tasks === null || household.tasks?.length === 0) {
+      if (household === null || household.tasks?.length === 0) {
         household.tasks = [];
       }
       household.tasks.push(action.payload);

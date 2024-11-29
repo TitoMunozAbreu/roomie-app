@@ -15,8 +15,8 @@ export default function userModal() {
     dispatch(uiActions.showModal());
     if (modalType === "formTask") {
       dispatch(householdActions.setIsTaskEdit(false));
-      dispatch(uiActions.resetFormSubmit());
     }
+    dispatch(uiActions.resetFormSubmit());
   };
 
   const handleSendForm = () => {

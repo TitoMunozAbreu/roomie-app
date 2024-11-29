@@ -12,9 +12,11 @@ export const getHouseholds = () => {
       .then(function (response) {
         dispatch(householdActions.setHouseholds(response.data));
         dispatch(uiActions.updateErrorMessage(null));
+        dispatch(uiActions.showLoading());
       })
       .catch(function (error) {
         dispatch(uiActions.updateErrorMessage(error.response.data));
+        dispatch(uiActions.showLoading());
       });
   };
 };
@@ -32,6 +34,7 @@ export const createHousehold = (householdName, userId, email) => {
     addNewHousehold()
       .then(function (response) {
         dispatch(householdActions.addNewHousehold(response.data));
+        dispatch(uiActions.updateErrorMessage(null));
         handleNotification("New household added.", dispatch);
       })
       .catch(function (error) {

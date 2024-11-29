@@ -29,5 +29,5 @@ public record TaskResquest(String taskId,
                            Category category,
                            @Min(1) int estimatedDuration,
                            @NotBlank @Email String assignedTo,
-                           @FutureOrPresent LocalDateTime dueDate,
+                           LocalDateTime dueDate,
                            Status status) {}

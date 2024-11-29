@@ -15,10 +15,12 @@ export const updatePreferences = (id, preferences) => {
           userActions.updatePreferences({ taskPreferences: response.data })
         );
         handleNotification("Task preferences updated!", dispatch);
+        dispatch(uiActions.resetFormSubmit());
       })
       .catch(function (error) {
         dispatch(uiActions.showModal());
         handleErrorResponse(error, dispatch);
+        dispatch(uiActions.resetFormSubmit());
       });
   };
 };

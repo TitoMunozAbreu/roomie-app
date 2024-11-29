@@ -51,7 +51,7 @@ const UserForm = () => {
   useEffect(() => {
     if (isFormSubmitTriggered) {
       console.log("submitting form");
-      
+
       form.submit();
     }
   }, [isFormSubmitTriggered, form, dispatch]);
@@ -97,7 +97,7 @@ const UserForm = () => {
     category: task?.category || null,
     estimatedDuration: task?.estimatedDuration || null,
     assignedTo: task?.assignedTo || null,
-    dueDate: task?.dueDate ? moment(task.dueDate) : null,
+    dueDate: task?.dueDate ? null : null,
     status: task?.status || null,
   });
 
@@ -174,7 +174,15 @@ const UserForm = () => {
                       },
                     ]}
                   >
-                    <Input placeholder="Task name" />
+                    <Select placeholder="Select category">
+                      <Select.Option value="Cleaning">Cleaning</Select.Option>
+                      <Select.Option value="Cooking">Cooking</Select.Option>
+                      <Select.Option value="Laundry">Laundry</Select.Option>
+                      <Select.Option value="Organizing">
+                        Organizing
+                      </Select.Option>
+                      <Select.Option value="Gardening">Gardening</Select.Option>
+                    </Select>
                   </Form.Item>
                   <Form.Item
                     {...restField}
@@ -259,6 +267,10 @@ const UserForm = () => {
                         required: true,
                         message: "Start time required",
                       },
+                      {
+                        type: "string",
+                        message: "Must type numbers"
+                      }
                     ]}
                   >
                     <Input placeholder="Start Time" type="time" />
@@ -302,7 +314,11 @@ const UserForm = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item label="taskId" name="taskId" hidden></Form.Item>
-              <Form.Item label="householdId" name="householdId" hidden></Form.Item>
+              <Form.Item
+                label="householdId"
+                name="householdId"
+                hidden
+              ></Form.Item>
               <Form.Item label="createdBy" name="createdBy" hidden></Form.Item>
             </Col>
           </Row>
@@ -339,7 +355,16 @@ const UserForm = () => {
           <Row gutter={16}>
             <Col span={24}>
               {/* Description */}
-              <Form.Item label="Description" name="description">
+              <Form.Item
+                label="Description"
+                name="description"
+                rules={[
+                  {
+                    pattern: /^[^\n]{0,45}$/, // Permite hasta 40 caracteres, sin saltos de línea.
+                    message: "Description must not exceed 40 characters.",
+                  },
+                ]}
+              >
                 <Input.TextArea placeholder="Enter task description" />
               </Form.Item>
             </Col>
@@ -355,12 +380,16 @@ const UserForm = () => {
                     required: true,
                     message: "Please enter an estimated duration!",
                   },
+                  {
+                    type: "number",
+                    min: 1,
+                    message: "Must be at least 1 minute!",
+                  },
                 ]}
               >
                 <InputNumber
                   style={{ width: "100%" }}
-                  min={1}
-                  placeholder="Enter estimated duration in minutes"
+                  placeholder="Estimated duration in minutes"
                 />
               </Form.Item>
             </Col>
@@ -391,7 +420,13 @@ const UserForm = () => {
                   { required: true, message: "Please select a due date!" },
                 ]}
               >
-                <DatePicker style={{ width: "100%" }} showTime />
+                <DatePicker
+                  style={{ width: "100%" }}
+                  showTime
+                  disabledDate={(current) =>
+                    current && current < moment().endOf("day")
+                  }
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
