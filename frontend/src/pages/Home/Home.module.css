@@ -1,4 +1,4 @@
-.homePage {
+  .homePage {
     padding: 50px;
   }
   
@@ -33,3 +33,15 @@
     mix-blend-mode: difference; */
   }
   
+  #title {
+    margin-top: 0;
+    font-size: 100px;
+    font-family:monospace;
+  }
+
+  #titleDarkMode {
+    margin-top: 0;
+    font-size: 100px;
+    font-family:monospace;
+    color: #1668dc;
+  }

@@ -1,5 +1,5 @@
 import "./Header.css";
-import logo from "../../../assets/images/logo.jpg";
+import logo from "../../../assets/images/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "../../../store/reducers/user-slice";
 import { Layout, Menu } from "antd";

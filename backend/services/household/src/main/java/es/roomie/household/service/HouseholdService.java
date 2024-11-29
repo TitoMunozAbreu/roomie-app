@@ -103,9 +103,9 @@ public class HouseholdService {
     /**
      * Updates the members of a household identified by its ID.
      *
-     * @param householdId The ID of the household to update.
+     * @param householdId   The ID of the household to update.
      * @param adminMemberId The ID of the admin member performing the update.
-     * @param memberEmails The list of member emails to update.
+     * @param memberEmails  The list of member emails to update.
      * @return ResponseEntity containing the updated HouseholdResponse object.
      */
     public ResponseEntity<HouseholdResponse> updateMembersByHouseholdId(String householdId, String adminMemberId, List<String> memberEmails) {
@@ -175,8 +175,8 @@ public class HouseholdService {
      * Updates the name of a household identified by its ID.
      *
      * @param householdId The ID of the household to update.
-     * @param userId The ID of the user requesting the update.
-     * @param name The new name for the household.
+     * @param userId      The ID of the user requesting the update.
+     * @param name        The new name for the household.
      * @return ResponseEntity containing the updated HouseholdNameResponse object.
      */
     public ResponseEntity<HouseholdNameResponse> updateHouseholdName(String householdId, String userId, String name) {
@@ -194,8 +194,8 @@ public class HouseholdService {
     /**
      * Updates the invitation acceptance status of a member for a specific household.
      *
-     * @param householdId The ID of the household.
-     * @param memberEmail The email of the member to update.
+     * @param householdId        The ID of the household.
+     * @param memberEmail        The email of the member to update.
      * @param invitationAccepted The new invitation status.
      * @return ResponseEntity containing a message indicating success or failure.
      */
@@ -209,7 +209,31 @@ public class HouseholdService {
                 .forEach(member -> member.setInvitationAccepted(invitationAccepted));
 
         householdRepository.save(household);
+        Optional<String> adminMemberEmail = household.getMembers().stream()
+                .filter(member -> Objects.equals(member.getRole(), admin))
+                .findFirst()
+                .map(Member::getEmail);
 
+        //send notification the invatation response to admimMember
+        if (adminMemberEmail.isPresent()) {
+            if (invitationAccepted) {
+                householdProducer.sendNotification(
+                        new NotificationMessage(
+                                "Invitation Accepted",
+                                "'%s' has successfully joined the '%s' household.".formatted(memberEmail, household.getHouseholdName()),
+                                adminMemberEmail.get()
+                        )
+                );
+            } else {
+                householdProducer.sendNotification(
+                        new NotificationMessage(
+                                "Invitation Declined",
+                                "'%s' has declined to join the '%s' household.".formatted(memberEmail, household.getHouseholdName()),
+                                adminMemberEmail.get()
+                        )
+                );
+            }
+        }
         String messageResponse = invitationAccepted ? "Invitation updated successfully." : "Invitation rejected.";
 
         return new ResponseEntity<>(messageResponse, OK);
@@ -218,9 +242,9 @@ public class HouseholdService {
     /**
      * Deletes a member from a household.
      *
-     * @param householdId The ID of the household.
+     * @param householdId      The ID of the household.
      * @param adminMemberEmail The email of the admin member requesting the deletion.
-     * @param memberEmail The email of the member to be deleted.
+     * @param memberEmail      The email of the member to be deleted.
      * @return ResponseEntity containing the updated HouseholdResponse object.
      */
     public ResponseEntity<HouseholdResponse> deleteMemberByHouseHold(String householdId, String adminMemberEmail, String memberEmail) {
@@ -265,7 +289,7 @@ public class HouseholdService {
      * Deletes a household by its ID.
      *
      * @param householdId The ID of the household to delete.
-     * @param userId The ID of the user requesting the deletion.
+     * @param userId      The ID of the user requesting the deletion.
      * @return ResponseEntity containing a message indicating successful deletion.
      */
     public ResponseEntity<?> deleteHouseholdById(String householdId, String userId) {
@@ -302,7 +326,7 @@ public class HouseholdService {
      * Checks if a member is an admin of the specified household.
      *
      * @param adminMemberEmail The email of the member to check.
-     * @param householdFound The household to check against.
+     * @param householdFound   The household to check against.
      * @return True if the member is an admin, false otherwise.
      */
     private static boolean isMemberAdmin(String adminMemberEmail, Household householdFound) {

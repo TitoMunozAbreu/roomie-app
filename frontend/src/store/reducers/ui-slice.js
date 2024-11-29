@@ -15,7 +15,7 @@ const initialState = {
   notification: null,
   errorMessage: null,
   submitForm: false,
-  isDarkMode: false
+  isDarkMode: true
 };
 
 const uiSlice = createSlice({

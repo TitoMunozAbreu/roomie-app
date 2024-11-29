@@ -1,11 +1,15 @@
 import React from "react";
-import { Row, Col, Button, Card } from "antd";
+import { Row, Col, Button, Card, Typography } from "antd";
 import { Divider } from "antd";
 import { FEATURES } from "./fetures";
 import { useKeycloak } from "@react-keycloak/web";
 import cleanHouse from "../../assets/images/clean-house.jpg";
 import styles from "./Home.module.css";
 import { useSelector } from "react-redux";
+import logo from "../../assets/images/logo.png";
+
+
+const { Title } = Typography;
 
 export default function Home() {
   const isDarkMode = useSelector((state) => state.ui.isDarkMode);
@@ -31,7 +35,13 @@ export default function Home() {
       <section className={styles.introSection}>
         <Row gutter={16} align="middle">
           <Col xs={24} md={12}>
-            <h1>ROOMIE</h1>
+            <img
+              style={{ width: 140, alignItems: "center", marginLeft: "80px" }}
+              src={logo}
+            ></img>
+            <Title id={isDarkMode ? styles.titleDarkMode : styles.title}>
+              ROOMIE
+            </Title>
             <h1>Manage Your Household Tasks</h1>
             <p>
               Organize and assign tasks easily to save time and simplify your
