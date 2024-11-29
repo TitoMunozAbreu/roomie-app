@@ -169,6 +169,8 @@ const Groups = () => {
                     onChange={(e) => setNewHouseholdName(e.target.value)}
                     onPressEnter={hanldeCreateHousehold}
                     variant="filled"
+                    maxLength={30}
+                    minLength={4}
                   />
                 </Col>
                 <Col xs={24} md={12}>
@@ -185,6 +187,9 @@ const Groups = () => {
                     style={{ marginLeft: "2%", width: "40px" }}
                     variant="outlined"
                     icon={<CheckOutlined />}
+                    disabled={
+                      newHouseholdName === null || newHouseholdName.length === 0
+                    }
                     onClick={hanldeCreateHousehold}
                   ></Button>
                 </Col>
@@ -213,6 +218,8 @@ const Groups = () => {
                       placeholder="Filled"
                       variant="filled"
                       style={{ width: "50%" }}
+                      maxLength={30}
+                      minLength={4}
                     />
                   ) : (
                     item.householdName
@@ -236,6 +243,10 @@ const Groups = () => {
                         variant="outlined"
                         icon={<CheckOutlined />}
                         onClick={hanldeUpdateHouseholdName}
+                        disabled={
+                          editHouseholdName === null ||
+                          editHouseholdName.length === 0
+                        }
                       ></Button>
                     </div>
                   ) : (

@@ -198,12 +198,12 @@ export default function Profile() {
               {availabilities}
             </Col>
           </Row>
-          <Divider />
+          {/* <Divider />
           <Row gutter={16}>
             <Col xs={24} md={12}>
               {taskHistory}
             </Col>
-          </Row>
+          </Row> */}
           <UserModal />
         </div>
       </>

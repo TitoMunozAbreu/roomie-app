@@ -8,6 +8,7 @@ import {
   Tabs,
   Badge,
   Divider,
+  Modal,
   Button,
   Tag,
   Row,
@@ -24,6 +25,7 @@ import {
   CloseCircleOutlined,
   StopOutlined,
   DeleteOutlined,
+  ExclamationCircleFilled,
 } from "@ant-design/icons";
 import { getHouseholds } from "../../store/actions/household-actions";
 import { householdActions } from "../../store/reducers/household-slice";
@@ -45,6 +47,8 @@ const taskStates = [
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const [modal, contextHolder] = Modal.useModal();
+
   const isLoading = useSelector((state) => state.ui.profile.isLoading);
   const households = useSelector((state) => state.households.households);
   const selectedHousehold = useSelector(
@@ -239,6 +243,19 @@ const Dashboard = () => {
         );
       }) || [];
 
+  const showDeleteConfirm = (taskId) => {
+    modal.confirm({
+      title: "Delete Task?",
+      icon: <ExclamationCircleFilled />,
+      content: "This can't be undone",
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk() {
+        onClickDeleteTask(taskId);
+      },
+    });
+  };
   return (
     <>
       <h2 style={{ textAlign: "start" }}>Households</h2>
@@ -246,135 +263,138 @@ const Dashboard = () => {
       {notification?.type && <Notification />}
       {errorMessage && <span>{errorMessage}</span>}
       {households?.length > 0 && (
-        <div>
-          <Row gutter={16}>
-            <Col span={6}>
-              <Menu
-                mode="inline"
-                defaultSelectedKeys={[households[0]?.id]}
-                style={{ height: "100%", borderRight: 0 }}
-                onSelect={({ key }) => updateSelectedHousehold(key)}
-              >
-                {households.map((household) => (
-                  <Menu.Item key={household.id}>
-                    {household.householdName}
-                  </Menu.Item>
-                ))}
-              </Menu>
-            </Col>
-            <Col span={18}>
-              <Card
-                title="Task Summary"
-                extra={
-                  <Button
-                    variant="outlined"
-                    icon={<PlusOutlined />}
-                    onClick={handleCreateTask}
-                  ></Button>
-                }
-              >
-                <Tabs
-                  defaultActiveKey="All"
-                  onChange={(key) => setSelectedFilter(key)}
+        <>
+          {contextHolder}
+          <div>
+            <Row gutter={16}>
+              <Col span={6}>
+                <Menu
+                  mode="inline"
+                  defaultSelectedKeys={[households[0]?.id]}
+                  style={{ height: "100%", borderRight: 0 }}
+                  onSelect={({ key }) => updateSelectedHousehold(key)}
                 >
-                  {taskStates.map((state) => (
-                    <TabPane tab={state} key={state} />
+                  {households.map((household) => (
+                    <Menu.Item key={household.id}>
+                      {household.householdName}
+                    </Menu.Item>
                   ))}
-                </Tabs>
-
-                {/* Filtro de miembros */}
-                <Select
-                  style={{ width: "200px", marginBottom: "16px" }}
-                  placeholder="Filter by member"
-                  onChange={(value) => setAssignedMemberFilter(value)}
-                  value={assignedMemberFilter}
+                </Menu>
+              </Col>
+              <Col span={18}>
+                <Card
+                  title="Task Summary"
+                  extra={
+                    <Button
+                      variant="outlined"
+                      icon={<PlusOutlined />}
+                      onClick={handleCreateTask}
+                    ></Button>
+                  }
                 >
-                  <Select.Option value={null}>All Members</Select.Option>
-                  {getMembers().map((member) => (
-                    <Select.Option key={member} value={member}>
-                      {member}
-                    </Select.Option>
-                  ))}
-                </Select>
+                  <Tabs
+                    defaultActiveKey="All"
+                    onChange={(key) => setSelectedFilter(key)}
+                  >
+                    {taskStates.map((state) => (
+                      <TabPane tab={state} key={state} />
+                    ))}
+                  </Tabs>
 
-                <List
-                  itemLayout="horizontal"
-                  dataSource={filteredTasks}
-                  renderItem={(task) => (
-                    <List.Item
-                      extra={
-                        <>
-                          <Button
-                            variant="outlined"
-                            icon={<DeleteOutlined />}
-                            danger
-                            style={{ marginRight: "1%" }}
-                            onClick={() => onClickDeleteTask(task.id)}
-                          ></Button>
-                          <Button
-                            variant="outlined"
-                            icon={<EditOutlined />}
-                            onClick={() => handleEditTask(task)}
-                          ></Button>
-                        </>
-                      }
-                    >
-                      <List.Item.Meta
-                        title={task.title}
-                        description={
+                  {/* Filtro de miembros */}
+                  <Select
+                    style={{ width: "200px", marginBottom: "16px" }}
+                    placeholder="Filter by member"
+                    onChange={(value) => setAssignedMemberFilter(value)}
+                    value={assignedMemberFilter}
+                  >
+                    <Select.Option value={null}>All Members</Select.Option>
+                    {getMembers().map((member) => (
+                      <Select.Option key={member} value={member}>
+                        {member}
+                      </Select.Option>
+                    ))}
+                  </Select>
+
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={filteredTasks}
+                    renderItem={(task) => (
+                      <List.Item
+                        extra={
                           <>
-                            <Row gutter={16}>
-                              <Col span={8} style={{ paddingBottom: 10 }}>
-                                <span>{task.description}</span>
-                              </Col>
-                              <Col span={3}>
-                                <span>assigned to</span>
-                              </Col>
-                              <Col>
-                                <span>
-                                  <b>{task.assignedTo}</b>
-                                </span>
-                              </Col>
-                              <Col span={9}>
-                                <span style={{marginLeft:"50%"}}>
-                                  <b>{task.estimatedDuration} min</b>
-                                </span>
-                              </Col>
-                            </Row>
-                            <Row gutter={16}>
-                              <Col span={8}>
-                                <div
-                                  onClick={() => onClickStatus(task.id)}
-                                  style={{ cursor: "pointer" }}
-                                >
-                                  {renderTaskStateBadge(
-                                    task.status,
-                                    editTaskStatus === task.id, // Comparar ID para editar solo esa tarea
-                                    (newStatus) =>
-                                      handleEditStatus(task.id, newStatus) // Pasar la función para actualizar
-                                  )}
-                                </div>
-                              </Col>
-                              <Col span={3}>
-                                <span>Due</span>
-                              </Col>
-                              <Col>
-                                <span>
-                                  <b>{task.dueDate}</b>
-                                </span>
-                              </Col>
-                            </Row>
+                            <Button
+                              variant="outlined"
+                              icon={<DeleteOutlined />}
+                              danger
+                              style={{ marginRight: "1%" }}
+                              onClick={() => showDeleteConfirm(task.id)}
+                            ></Button>
+                            <Button
+                              variant="outlined"
+                              icon={<EditOutlined />}
+                              onClick={() => handleEditTask(task)}
+                            ></Button>
                           </>
                         }
-                      />
-                    </List.Item>
-                  )}
-                />
-              </Card>
-            </Col>
-          </Row>
-          <UserModal />
-        </div>
+                      >
+                        <List.Item.Meta
+                          title={task.title}
+                          description={
+                            <>
+                              <Row gutter={16}>
+                                <Col span={8} style={{ paddingBottom: 10 }}>
+                                  <span>{task.description}</span>
+                                </Col>
+                                <Col span={3}>
+                                  <span>assigned to</span>
+                                </Col>
+                                <Col>
+                                  <span>
+                                    <b>{task.assignedTo}</b>
+                                  </span>
+                                </Col>
+                                <Col span={9}>
+                                  <span style={{ marginLeft: "50%" }}>
+                                    <b>{task.estimatedDuration} min</b>
+                                  </span>
+                                </Col>
+                              </Row>
+                              <Row gutter={16}>
+                                <Col span={8}>
+                                  <div
+                                    onClick={() => onClickStatus(task.id)}
+                                    style={{ cursor: "pointer" }}
+                                  >
+                                    {renderTaskStateBadge(
+                                      task.status,
+                                      editTaskStatus === task.id, // Comparar ID para editar solo esa tarea
+                                      (newStatus) =>
+                                        handleEditStatus(task.id, newStatus) // Pasar la función para actualizar
+                                    )}
+                                  </div>
+                                </Col>
+                                <Col span={3}>
+                                  <span>Due</span>
+                                </Col>
+                                <Col>
+                                  <span>
+                                    <b>{task.dueDate}</b>
+                                  </span>
+                                </Col>
+                              </Row>
+                            </>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+              </Col>
+            </Row>
+            <UserModal />
+          </div>
+        </>
       )}
     </>
   );
