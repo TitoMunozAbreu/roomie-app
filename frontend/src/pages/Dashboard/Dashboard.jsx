@@ -56,6 +56,7 @@ const Dashboard = () => {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [editTaskStatus, setEditTaskStatus] = useState(null);
+  const [assignedMemberFilter, setAssignedMemberFilter] = useState(null);
 
   useEffect(() => {
     if (households === null || households.length === 0) {
@@ -63,6 +64,18 @@ const Dashboard = () => {
       dispatch(getHouseholds());
     }
   }, [errorMessage, selectedHousehold, dispatch]);
+
+  const getMembers = () => {
+    const members = new Set();
+    households?.forEach((household) => {
+      household?.tasks?.forEach((task) => {
+        if (task.assignedTo) {
+          members.add(task.assignedTo);
+        }
+      });
+    });
+    return Array.from(members);
+  };
 
   const renderTaskStateBadge = (status, isEditing, onEditStatus) => {
     const statusOptions = [
@@ -214,6 +227,18 @@ const Dashboard = () => {
     />
   );
 
+  const filteredTasks =
+    households
+      ?.find((household) => household?.id === selectedHousehold?.id)
+      ?.tasks?.filter((task) => {
+        return (
+          (selectedFilter === "All" || task.status === selectedFilter) &&
+          (assignedMemberFilter
+            ? task.assignedTo === assignedMemberFilter
+            : true)
+        );
+      }) || [];
+
   return (
     <>
       <h2 style={{ textAlign: "start" }}>Households</h2>
@@ -256,19 +281,25 @@ const Dashboard = () => {
                     <TabPane tab={state} key={state} />
                   ))}
                 </Tabs>
+
+                {/* Filtro de miembros */}
+                <Select
+                  style={{ width: "200px", marginBottom: "16px" }}
+                  placeholder="Filter by member"
+                  onChange={(value) => setAssignedMemberFilter(value)}
+                  value={assignedMemberFilter}
+                >
+                  <Select.Option value={null}>All Members</Select.Option>
+                  {getMembers().map((member) => (
+                    <Select.Option key={member} value={member}>
+                      {member}
+                    </Select.Option>
+                  ))}
+                </Select>
+
                 <List
                   itemLayout="horizontal"
-                  dataSource={
-                    households
-                      .find(
-                        (household) => household?.id === selectedHousehold?.id
-                      )
-                      ?.tasks?.filter(
-                        (task) =>
-                          selectedFilter === "All" ||
-                          task.status === selectedFilter
-                      ) || []
-                  }
+                  dataSource={filteredTasks}
                   renderItem={(task) => (
                     <List.Item
                       extra={
@@ -293,14 +324,21 @@ const Dashboard = () => {
                         description={
                           <>
                             <Row gutter={16}>
-                              <Col span={8} style={{paddingBottom:10}}>
+                              <Col span={8} style={{ paddingBottom: 10 }}>
                                 <span>{task.description}</span>
                               </Col>
                               <Col span={3}>
                                 <span>assigned to</span>
                               </Col>
-                              <Col >
-                                <span><b>{task.assignedTo}</b></span>
+                              <Col>
+                                <span>
+                                  <b>{task.assignedTo}</b>
+                                </span>
+                              </Col>
+                              <Col span={9}>
+                                <span style={{marginLeft:"50%"}}>
+                                  <b>{task.estimatedDuration} min</b>
+                                </span>
                               </Col>
                             </Row>
                             <Row gutter={16}>
@@ -318,10 +356,12 @@ const Dashboard = () => {
                                 </div>
                               </Col>
                               <Col span={3}>
-                                  <span>Due</span>
+                                <span>Due</span>
                               </Col>
                               <Col>
-                                  <span><b>{task.dueDate}</b></span>
+                                <span>
+                                  <b>{task.dueDate}</b>
+                                </span>
                               </Col>
                             </Row>
                           </>

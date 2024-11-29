@@ -439,7 +439,8 @@ const UserForm = () => {
                 <Select placeholder="Select a member">
                   {selectedHousehold?.members.map((member) => (
                     <Select.Option key={member.email} value={member.email}>
-                      {member.firstName} {member.lastName}
+                      <>{member.firstName} {member.lastName}</>
+                      <>{member.firstName === null ? member.email:''}</>
                     </Select.Option>
                   ))}
                 </Select>
